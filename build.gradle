@@ -1,0 +1,64 @@
+buildscript {
+	ext {
+		springBootVersion = '1.4.2.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+//project.ext.applicationDefaultJvmArgs = "-Xdebug" "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
+
+springBoot {
+  mainClass = "my.TestApplication"
+  //jvmArguments "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
+}
+
+bootRun {
+	jvmArgs = ["-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"]
+}
+
+jar {
+	baseName = 'my'
+	version = '0.0.1-SNAPSHOT'
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-devtools")
+    compile('org.springframework.boot:spring-boot-starter-actuator')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+
+	runtime('com.h2database:h2')
+	// runtime('org.apache.derby:derby')
+}
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
