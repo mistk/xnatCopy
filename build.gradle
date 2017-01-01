@@ -3,6 +3,8 @@ buildscript {
 		springBootVersion = '1.4.2.RELEASE'
 	}
 	repositories {
+		mavenLocal()
+		jcenter()
 		mavenCentral()
 	}
 	dependencies {
@@ -38,6 +40,8 @@ targetCompatibility = 1.8
 
 
 repositories {
+	mavenLocal()
+	jcenter()
     mavenCentral()
 }
 
@@ -47,6 +51,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
 
+	compile('org.flywaydb:flyway-core')
+	
 	runtime('com.h2database:h2')
 	// runtime('org.apache.derby:derby')
 }
