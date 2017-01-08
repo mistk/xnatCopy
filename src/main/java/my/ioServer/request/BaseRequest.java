@@ -1,26 +1,24 @@
-package my.entity;
+package my.ioServer.request;
 
 import java.io.Serializable;
-
-import javax.persistence.MappedSuperclass;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * base entity.
+ * BaseRequest
  * @author xnat
  *
  */
-@MappedSuperclass
-public class BaseEntity implements Serializable {
+public class BaseRequest implements Serializable {
 
 	/**
-	 * serialVersionUID
+	 * serialVersionUID.
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8039399861607968256L;
 
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
+
 }

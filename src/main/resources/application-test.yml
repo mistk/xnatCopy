@@ -1,16 +1,28 @@
+# test envrionment configuration file
 spring:
-  jpa.hibernate.ddl-auto: validate
+#  jpa.hibernate.ddl-auto: validate
   h2.console:
     enabled: true
     path: /h2-console
   devtools:
     restart.enabled: false
   datasource:
-#    schema:
-#    data: 
+    schema:
+    data: 
     url: jdbc:h2:./data/h2/test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: test
     password: test
     max-active: 10
 
-logging.file: D:\tmp\spring-boot.log
+logging:
+  file: D:\tmp\spring-boot.log
+  level:
+#    my.autoconfigure.IoAcceptorAutoConfigure: trace
+    my.ioServer.codec.DeviceCollectDataRequestDecoder: trace
+    org.apache.mina.filter.logging.LoggingFilter: trace
+    my.ioServer.DeviceCollectDataIoHandler: trace
+
+# io server config
+ioServer:
+  defaultPort: 10000
+#  bindAddresses: localhost:11111
