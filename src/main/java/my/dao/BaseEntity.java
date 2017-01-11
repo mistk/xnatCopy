@@ -1,4 +1,4 @@
-package my.entity;
+package my.dao;
 
 import java.io.Serializable;
 

@@ -1,9 +1,11 @@
-package my.entity;
+package my.dao.h2.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import my.dao.BaseEntity;
 
 /**
  * district entity

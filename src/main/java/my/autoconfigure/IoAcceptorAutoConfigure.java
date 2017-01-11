@@ -15,6 +15,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
+import org.apache.mina.filter.logging.LogLevel;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
@@ -26,8 +27,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import my.constanst.CommonConstants;
-import my.ioServer.DeviceCollectDataIoHandler;
 import my.ioServer.codec.DeviceCollectDataCodecFactory;
+import my.ioServer.handler.DeviceCollectDataIoHandler;
 
 @Configuration
 @EnableConfigurationProperties(IoServerProperties.class)
@@ -39,10 +40,32 @@ public class IoAcceptorAutoConfigure {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public LoggingFilter loggingFilter() {
+	public LoggingFilter loggingFilter(IoServerProperties properties) {
 		logger.trace("init bean LoggingFilter start...");
 		LoggingFilter loggingFilter = new LoggingFilter();
-		// TODO logger config
+//		loggingFilter.setExceptionCaughtLogLevel(properties.getFilterLogConfig().getExceptionCaughtLevel());
+//		loggingFilter.setMessageReceivedLogLevel(properties.getFilterLogConfig().getMessageReceivedLevel());
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getExceptionCaughtLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getExceptionCaughtLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getMessageReceivedLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getMessageReceivedLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getMessageSentLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getMessageSentLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionClosedLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionClosedLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionCreatedLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionCreatedLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionIdleLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionIdleLevel()));
+//		}
+//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionOpenedLevel())) {
+//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionOpenedLevel()));
+//		}
 		logger.trace("init bean LoggingFilter end...");
 		return loggingFilter;
 	}
@@ -63,13 +86,18 @@ public class IoAcceptorAutoConfigure {
 	public IoAcceptor ioAcceptor(IoServerProperties properties) {
 		logger.trace("init bean IoAcceptor start...");
 		IoAcceptor acceptor = new NioSocketAcceptor();
-		acceptor.getFilterChain().addLast(FILTER_NAME_LOGGER, loggingFilter());
+		// SimpleIoProcessorPool include some session processor, every processor process session.
+		// org.apache.mina.core.polling.AbstractPollingIoProcessor.process(S) invoke filters.
+		acceptor.getFilterChain().addLast(FILTER_NAME_LOGGER, loggingFilter(properties));
 //		acceptor.getFilterChain().addLast(FILTER_NAME_CODEC, new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
 		acceptor.getFilterChain().addLast(FILTER_NAME_CODEC, new ProtocolCodecFilter(new DeviceCollectDataCodecFactory()));
+		
 		// TODO config session.
 //		acceptor.getSessionConfig()
 		// acceptor have filterChain include TailFilter will invoke IoHandler for us to process our logic.
 		acceptor.setHandler(ioHandler());
+
+		
 		// acceptor bind will init acceptor start listen.
 		if (!serverBind(acceptor, properties)) {
 			// acceptor = null;
@@ -99,8 +127,10 @@ public class IoAcceptorAutoConfigure {
 				acceptor.dispose();
 				return false;
 			} else {
-				acceptor.bind(addresses);
-				logger.info("IO Server binded addresses: {}", addresses);
+				if (properties.isAutostart()) {
+					acceptor.bind(addresses);
+					logger.info("IO Server start binded addresses: {}", addresses);
+				}
 			}
 		} catch (IOException e) {
 			logger.error("IoAcceptor bind error", e);
