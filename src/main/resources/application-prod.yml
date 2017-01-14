@@ -14,4 +14,13 @@ spring:
 #    password: test
 #    max-active: 10
 
-logging.file: D:\tmp\spring-boot.log
+logging:
+  file: D:\tmp\spring-boot.log
+  level:
+    org.apache.mina.filter.logging.LoggingFilter: trace
+
+# io server config
+ioServer:
+  filterLogConfig:
+    sessionCreatedLevel: debug
+    sessionClosedLevel: debug

@@ -15,7 +15,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
-import org.apache.mina.filter.logging.LogLevel;
 import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
@@ -26,6 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import my.autoconfigure.IoServerProperties.FilterLogConfig;
 import my.constanst.CommonConstants;
 import my.ioServer.codec.DeviceCollectDataCodecFactory;
 import my.ioServer.handler.DeviceCollectDataIoHandler;
@@ -34,8 +34,8 @@ import my.ioServer.handler.DeviceCollectDataIoHandler;
 @EnableConfigurationProperties(IoServerProperties.class)
 @ConditionalOnClass(IoAcceptor.class)
 public class IoAcceptorAutoConfigure {
-	public static final String FILTER_NAME_LOGGER = "logger";
-	public static final String FILTER_NAME_CODEC = "codec";
+	private static final String FILTER_NAME_LOGGER = "logger";
+	private static final String FILTER_NAME_CODEC = "codec";
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Bean
@@ -43,29 +43,14 @@ public class IoAcceptorAutoConfigure {
 	public LoggingFilter loggingFilter(IoServerProperties properties) {
 		logger.trace("init bean LoggingFilter start...");
 		LoggingFilter loggingFilter = new LoggingFilter();
-//		loggingFilter.setExceptionCaughtLogLevel(properties.getFilterLogConfig().getExceptionCaughtLevel());
-//		loggingFilter.setMessageReceivedLogLevel(properties.getFilterLogConfig().getMessageReceivedLevel());
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getExceptionCaughtLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getExceptionCaughtLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getMessageReceivedLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getMessageReceivedLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getMessageSentLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getMessageSentLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionClosedLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionClosedLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionCreatedLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionCreatedLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionIdleLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionIdleLevel()));
-//		}
-//		if (null != LogLevel.valueOf(properties.getFilterLogConfig().getSessionOpenedLevel())) {
-//			loggingFilter.setExceptionCaughtLogLevel(LogLevel.valueOf(properties.getFilterLogConfig().getSessionOpenedLevel()));
-//		}
+		FilterLogConfig filterLogConfig = properties.getFilterLogConfig();
+		loggingFilter.setExceptionCaughtLogLevel(filterLogConfig.getExceptionCaughtLevel());
+		loggingFilter.setMessageReceivedLogLevel(filterLogConfig.getMessageReceivedLevel());
+		loggingFilter.setMessageSentLogLevel(filterLogConfig.getMessageSentLevel());
+		loggingFilter.setSessionClosedLogLevel(filterLogConfig.getSessionClosedLevel());
+		loggingFilter.setSessionCreatedLogLevel(filterLogConfig.getSessionCreatedLevel());
+		loggingFilter.setSessionIdleLogLevel(filterLogConfig.getSessionIdleLevel());
+		loggingFilter.setSessionOpenedLogLevel(filterLogConfig.getSessionOpenedLevel());
 		logger.trace("init bean LoggingFilter end...");
 		return loggingFilter;
 	}
@@ -97,13 +82,16 @@ public class IoAcceptorAutoConfigure {
 		// acceptor have filterChain include TailFilter will invoke IoHandler for us to process our logic.
 		acceptor.setHandler(ioHandler());
 
-		
-		// acceptor bind will init acceptor start listen.
-		if (!serverBind(acceptor, properties)) {
-			// acceptor = null;
-			logger.error("IO server bind error.");
+		if (properties.isAutostart()) {
+			// acceptor bind will init acceptor start listen.
+			if (serverBind(acceptor, properties)) {
+				// TODO. post process acceptor.
+			} else {
+				// acceptor = null;
+				logger.error("IO server bind error.");
+			}
 		} else {
-			// TODO.
+			logger.info("IO server is need start by hand");
 		}
 		logger.trace("init bean IoAcceptor end...");
 		return acceptor;
@@ -127,10 +115,8 @@ public class IoAcceptorAutoConfigure {
 				acceptor.dispose();
 				return false;
 			} else {
-				if (properties.isAutostart()) {
-					acceptor.bind(addresses);
-					logger.info("IO Server start binded addresses: {}", addresses);
-				}
+				acceptor.bind(addresses);
+				logger.info("IO Server start binded addresses: {}", addresses);
 			}
 		} catch (IOException e) {
 			logger.error("IoAcceptor bind error", e);

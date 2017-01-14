@@ -22,13 +22,22 @@ spring:
 logging:
   file: D:\tmp\spring-boot.log
   level:
-#    my.autoconfigure.IoAcceptorAutoConfigure: trace
+    my.autoconfigure.IoAcceptorAutoConfigure: trace
     my.ioServer.codec.DeviceCollectDataRequestDecoder: trace
     org.apache.mina.filter.logging.LoggingFilter: trace
-    my.ioServer.DeviceCollectDataIoHandler: trace
-    my.ioServer.handler.PersistCommand: trace
+    my.ioServer.handler.DeviceCollectDataIoHandler: trace
+    my.util.handler.HandlerChain: trace
+    my.ioServer.handler.RequestDataProcessor: trace
+    my.ioServer.handler.ResponseProcessor: trace
+    my.ioServer.handler.ValidateProcessor: trace
 
 # io server config
 ioServer:
+  filterLogConfig:
+    exceptionCaughtLevel: NONE
+    sessionCreatedLevel: debug
+    sessionOpenedLevel: trace
+    sessionClosedLevel: debug
+    sessionIdleLevel: trace
   defaultPort: 10000
 #  bindAddresses: localhost:11111

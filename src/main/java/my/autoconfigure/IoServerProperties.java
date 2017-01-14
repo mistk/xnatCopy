@@ -25,7 +25,7 @@ public class IoServerProperties {
 	/**
 	 * FilterLogConfig.
 	 */
-	private FilterLogConfig filterLogConfig;
+	private FilterLogConfig filterLogConfig = new FilterLogConfig();
 	
 
 	/**
@@ -34,19 +34,12 @@ public class IoServerProperties {
 	 *
 	 */
 	class FilterLogConfig {
-	    /** The log level for the exceptionCaught event. Default to WARN. */
 	    private LogLevel exceptionCaughtLevel = LogLevel.WARN;
-	    /** The log level for the messageSent event. Default to INFO. */
 	    private LogLevel messageSentLevel = LogLevel.INFO;
-	    /** The log level for the messageReceived event. Default to INFO. */
 	    private LogLevel messageReceivedLevel = LogLevel.INFO;
-	    /** The log level for the sessionCreated event. Default to INFO. */
 	    private LogLevel sessionCreatedLevel = LogLevel.INFO;
-	    /** The log level for the sessionOpened event. Default to INFO. */
 	    private LogLevel sessionOpenedLevel = LogLevel.INFO;
-	    /** The log level for the sessionIdle event. Default to INFO. */
 	    private LogLevel sessionIdleLevel = LogLevel.INFO;
-	    /** The log level for the sessionClosed event. Default to INFO. */
 	    private LogLevel sessionClosedLevel = LogLevel.INFO;
 		public LogLevel getExceptionCaughtLevel() {
 			return exceptionCaughtLevel;

@@ -1,47 +1,66 @@
 package my.ioServer.handler;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.text.StrBuilder;
+import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
-import org.apache.mina.handler.chain.ChainedIoHandler;
-import org.apache.mina.handler.chain.IoHandlerChain.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import my.util.handler.HandlerChain;
+import my.util.handler.HandlerResult;
+import my.util.handler.Processor;
+import my.util.handler.StatusCode;
 
 /**
- * Io handler, contains Executable Commands.
- * @author xnat
+ * Io handler, contains Executable Processor.
+ * @author hubert
  *
  */
-public class DeviceCollectDataIoHandler extends ChainedIoHandler implements InitializingBean {
+public class DeviceCollectDataIoHandler extends IoHandlerAdapter implements InitializingBean {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private HandlerChain messageReceivedHandlerChain;
+	@Autowired
+	private Processor validateProcessor;
+	@Autowired
+	private Processor requestDataProcessor;
+	@Autowired
+	private Processor responseProcessor;
+	
+	public void afterPropertiesSet() throws Exception {
+		logger.trace("Initializ bean IoHandler start...");
+		messageReceivedHandlerChain = new HandlerChain(3)
+				.setName(new StrBuilder().append(getClass().getSimpleName()).append(".messageReceivedHandlerChain").toString())
+				.add(validateProcessor, new StatusCode(1, RequestDataProcessor.class.getSimpleName()))
+				.add(requestDataProcessor)
+				.add(responseProcessor);
+		logger.info("init a HandlerChain: {}", messageReceivedHandlerChain.getName());
+		logger.trace("Initializ bean IoHandler end...");
+	}
 	
 	@Override
 	public void messageReceived(IoSession session, Object message) throws Exception {
 		// TODO performance monitor.
-		logger.trace("handler chain process start, message: {}", message);
-		super.messageReceived(session, message);
-		logger.trace("handler chain process end");
+		logger.trace("handle messageReceived event start, message: {}", message);
+		logger.debug("handler messageReceived event, IoSessionId: {}", session.getId());
+		Map<Object, Object> params = new HashMap<Object, Object>();
+		params.put(IoHandlerConstants.PARAM_IOSESSION, session);
+		params.put(IoHandlerConstants.PARAM_MESSAGE, message);
+		HandlerResult handlerResult = messageReceivedHandlerChain.run(params);
+		// TODO handle result.
+		logger.trace("handle messageReceived event start end");
 	}
 
-	public void afterPropertiesSet() throws Exception {
-		logger.trace("Initializ bean IoHandler start...");
-		getChain().addFirst(ValidateCommand.class.getSimpleName(), new ValidateCommand());
-		getChain().addLast(PersistCommand.class.getSimpleName(), new PersistCommand());
-		// TODO logger debug.
-//		if (logger.isDebugEnabled()) {
-//			List<Entry> commands = getChain().getAll();
-//			List<String> commandsStr = new ArrayList<String>(commands.size());
-//			if (CollectionUtils.isNotEmpty(commands)) {
-//				for (Entry e : commands) {
-//					commandsStr.add(e.getName());
-//				}
-//			}
-//			logger.debug("Handler chain Execute Commands: {}", commandsStr);
-//		}
-		logger.trace("Initializ bean IoHandler end...");
+	@Override
+	public void exceptionCaught(IoSession session, Throwable cause) throws Exception {
+		logger.error("exception happen: ", cause);
+	}
+	
+	public HandlerChain getMessageReceivedHandlerChain() {
+		return messageReceivedHandlerChain;
 	}
 }
