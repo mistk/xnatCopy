@@ -34,10 +34,11 @@ logging:
 # io server config
 ioServer:
   filterLogConfig:
-    exceptionCaughtLevel: NONE
-    sessionCreatedLevel: debug
-    sessionOpenedLevel: trace
-    sessionClosedLevel: debug
-    sessionIdleLevel: trace
+#   exception handle by IoHandler
+    exceptionCaughtLogLevel: none
+    sessionCreatedLogLevel: debug
+    sessionOpenedLogLevel: trace
+    sessionClosedLogLevel: debug
+    sessionIdleLogLevel: trace
   defaultPort: 10000
 #  bindAddresses: localhost:11111

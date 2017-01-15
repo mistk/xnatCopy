@@ -21,11 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import my.autoconfigure.IoServerProperties.FilterLogConfig;
 import my.constanst.CommonConstants;
 import my.ioServer.codec.DeviceCollectDataCodecFactory;
 import my.ioServer.handler.DeviceCollectDataIoHandler;
@@ -40,17 +40,10 @@ public class IoAcceptorAutoConfigure {
 
 	@Bean
 	@ConditionalOnMissingBean
+	@ConfigurationProperties(prefix = "ioServer.filterLogConfig")
 	public LoggingFilter loggingFilter(IoServerProperties properties) {
 		logger.trace("init bean LoggingFilter start...");
 		LoggingFilter loggingFilter = new LoggingFilter();
-		FilterLogConfig filterLogConfig = properties.getFilterLogConfig();
-		loggingFilter.setExceptionCaughtLogLevel(filterLogConfig.getExceptionCaughtLevel());
-		loggingFilter.setMessageReceivedLogLevel(filterLogConfig.getMessageReceivedLevel());
-		loggingFilter.setMessageSentLogLevel(filterLogConfig.getMessageSentLevel());
-		loggingFilter.setSessionClosedLogLevel(filterLogConfig.getSessionClosedLevel());
-		loggingFilter.setSessionCreatedLogLevel(filterLogConfig.getSessionCreatedLevel());
-		loggingFilter.setSessionIdleLogLevel(filterLogConfig.getSessionIdleLevel());
-		loggingFilter.setSessionOpenedLogLevel(filterLogConfig.getSessionOpenedLevel());
 		logger.trace("init bean LoggingFilter end...");
 		return loggingFilter;
 	}

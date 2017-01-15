@@ -179,7 +179,7 @@ public class HandlerChain {
 				}
 				if (jumpEntry == null) {
 					handlerResult.setSuccess(false);
-					throw new HandlerChainException(MessageFormat.format("processor: {0} return code: {1} is not exist jump processor", preExceuteEntry.getKey(), preProcessStatus));
+					throw new HandlerChainException(MessageFormat.format("processor: {0} return code: {1} is not exist mapped jump processor", preExceuteEntry.getKey(), preProcessStatus));
 				} else {
 					entry = jumpEntry;
 				}

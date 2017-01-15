@@ -1,6 +1,5 @@
 package my.autoconfigure;
 
-import org.apache.mina.filter.logging.LogLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "ioServer")
@@ -22,119 +21,6 @@ public class IoServerProperties {
 	 * default port is 10000. Generally used start server or development mode.
 	 */
 	private int defaultPort = 10000;
-	/**
-	 * FilterLogConfig.
-	 */
-	private FilterLogConfig filterLogConfig = new FilterLogConfig();
-	
-
-	/**
-	 * ref org.apache.mina.filter.logging.LoggingFilter.
-	 * @author xnat
-	 *
-	 */
-	class FilterLogConfig {
-	    private LogLevel exceptionCaughtLevel = LogLevel.WARN;
-	    private LogLevel messageSentLevel = LogLevel.INFO;
-	    private LogLevel messageReceivedLevel = LogLevel.INFO;
-	    private LogLevel sessionCreatedLevel = LogLevel.INFO;
-	    private LogLevel sessionOpenedLevel = LogLevel.INFO;
-	    private LogLevel sessionIdleLevel = LogLevel.INFO;
-	    private LogLevel sessionClosedLevel = LogLevel.INFO;
-		public LogLevel getExceptionCaughtLevel() {
-			return exceptionCaughtLevel;
-		}
-		public void setExceptionCaughtLevel(LogLevel exceptionCaughtLevel) {
-			this.exceptionCaughtLevel = exceptionCaughtLevel;
-		}
-		public LogLevel getMessageSentLevel() {
-			return messageSentLevel;
-		}
-		public void setMessageSentLevel(LogLevel messageSentLevel) {
-			this.messageSentLevel = messageSentLevel;
-		}
-		public LogLevel getMessageReceivedLevel() {
-			return messageReceivedLevel;
-		}
-		public void setMessageReceivedLevel(LogLevel messageReceivedLevel) {
-			this.messageReceivedLevel = messageReceivedLevel;
-		}
-		public LogLevel getSessionCreatedLevel() {
-			return sessionCreatedLevel;
-		}
-		public void setSessionCreatedLevel(LogLevel sessionCreatedLevel) {
-			this.sessionCreatedLevel = sessionCreatedLevel;
-		}
-		public LogLevel getSessionOpenedLevel() {
-			return sessionOpenedLevel;
-		}
-		public void setSessionOpenedLevel(LogLevel sessionOpenedLevel) {
-			this.sessionOpenedLevel = sessionOpenedLevel;
-		}
-		public LogLevel getSessionIdleLevel() {
-			return sessionIdleLevel;
-		}
-		public void setSessionIdleLevel(LogLevel sessionIdleLevel) {
-			this.sessionIdleLevel = sessionIdleLevel;
-		}
-		public LogLevel getSessionClosedLevel() {
-			return sessionClosedLevel;
-		}
-		public void setSessionClosedLevel(LogLevel sessionClosedLevel) {
-			this.sessionClosedLevel = sessionClosedLevel;
-		}
-	}
-//	class FilterLogConfig {
-//		private String exceptionCaughtLevel;
-//	    private String messageSentLevel;
-//	    private String messageReceivedLevel;
-//	    private String sessionCreatedLevel;
-//	    private String sessionOpenedLevel;
-//	    private String sessionIdleLevel;
-//	    private String sessionClosedLevel;
-//		public String getExceptionCaughtLevel() {
-//			return exceptionCaughtLevel;
-//		}
-//		public void setExceptionCaughtLevel(String exceptionCaughtLevel) {
-//			this.exceptionCaughtLevel = exceptionCaughtLevel;
-//		}
-//		public String getMessageSentLevel() {
-//			return messageSentLevel;
-//		}
-//		public void setMessageSentLevel(String messageSentLevel) {
-//			this.messageSentLevel = messageSentLevel;
-//		}
-//		public String getMessageReceivedLevel() {
-//			return messageReceivedLevel;
-//		}
-//		public void setMessageReceivedLevel(String messageReceivedLevel) {
-//			this.messageReceivedLevel = messageReceivedLevel;
-//		}
-//		public String getSessionCreatedLevel() {
-//			return sessionCreatedLevel;
-//		}
-//		public void setSessionCreatedLevel(String sessionCreatedLevel) {
-//			this.sessionCreatedLevel = sessionCreatedLevel;
-//		}
-//		public String getSessionOpenedLevel() {
-//			return sessionOpenedLevel;
-//		}
-//		public void setSessionOpenedLevel(String sessionOpenedLevel) {
-//			this.sessionOpenedLevel = sessionOpenedLevel;
-//		}
-//		public String getSessionIdleLevel() {
-//			return sessionIdleLevel;
-//		}
-//		public void setSessionIdleLevel(String sessionIdleLevel) {
-//			this.sessionIdleLevel = sessionIdleLevel;
-//		}
-//		public String getSessionClosedLevel() {
-//			return sessionClosedLevel;
-//		}
-//		public void setSessionClosedLevel(String sessionClosedLevel) {
-//			this.sessionClosedLevel = sessionClosedLevel;
-//		}
-//	}
 	
 	public boolean isUseAllLocalAddress() {
 		return useAllLocalAddress;
@@ -167,13 +53,4 @@ public class IoServerProperties {
 	public void setAutostart(boolean autostart) {
 		this.autostart = autostart;
 	}
-
-	public FilterLogConfig getFilterLogConfig() {
-		return filterLogConfig;
-	}
-
-	public void setFilterLogConfig(FilterLogConfig filterLogConfig) {
-		this.filterLogConfig = filterLogConfig;
-	}
-
 }

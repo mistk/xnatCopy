@@ -15,7 +15,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration  
+@Configuration
 @EnableJpaRepositories(basePackages = {"my.dao.h2.repository"}, entityManagerFactoryRef = "h2EntityManagerFactory", transactionManagerRef = "h2TransactionManager")
 public class H2Config extends BaseJpaConfig {
 	
