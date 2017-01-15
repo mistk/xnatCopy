@@ -55,6 +55,8 @@ dependencies {
 	compile group: 'org.apache.mina', name: 'mina-core', version: '2.0.16'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+	
 	
 	// runtime('mysql:mysql-connector-java')
 	runtime('com.h2database:h2')

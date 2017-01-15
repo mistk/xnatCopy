@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import my.constanst.CommonConstants;
 
+/**
+ * controller invoke DTOGenerator and service.
+ * @author xnat
+ *
+ */
 @RestController
 @RequestMapping("rest")
 public class TestRestController {
