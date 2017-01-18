@@ -9,7 +9,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +42,10 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 	 * convert function separator.
 	 */
 	private String convertFunctionSeparator = ":";
+	/**
+	 * field value converter.
+	 */
+	protected final Converter converter;
     /**
      * constant configure string. like: [acd]{String}
      */
@@ -56,9 +59,13 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 	 */
 	protected static final Pattern PATTERN_BRACE = Pattern.compile("\\{(.+)\\}");
 	/**
-	 * like: {funcName} or {funcName(arg1,arg2)}
+	 * like: funcName or funcName(arg1,arg2)
 	 */
-	protected static final Pattern PATTERN_FUNCTION = Pattern.compile("^\\{([a-zA-Z]+)(\\([a-zA-Z0-9]+(,[a-zA-Z0-9])*\\))?\\}$");
+	protected static final Pattern PATTERN_FUNCTION = Pattern.compile("^([a-zA-Z]+)(\\([a-zA-Z0-9]+(,[a-zA-Z0-9])*\\))?$");
+	
+	protected SimpleMultiFieldGenerator() {
+	    converter = new Converter();
+    }
 	
 	@Override
 	protected boolean isValid(GeneratorContext pGeneratorContext) {
@@ -69,149 +76,184 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 				valid = false;
 			}
 		}
+		if (valid) {
+		    if (converter == null) {
+		        logger.error("lose a available converter...");
+		        valid = false;
+		    }
+		}
 		return valid;
 	}
 	
 	@Override
 	protected Map<String, Object> doGenerate(GeneratorContext pGeneratorContext) {
+	    logger.trace("generate multi field start...");
 		Map<String, Object> result = new HashMap<>();
 		Iterator<Entry<String, String>> it = propertyMaping.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<String, String> entry = it.next();
-			Object value = createValue(entry, pGeneratorContext);
+			Object value = populateValue(entry, pGeneratorContext);
 			result.put(entry.getKey(), value);
 		}
+		logger.debug("generate multi field result: {}", result);
 		return result;
 	}
 
-	private Object createValue(Entry<String, String> pEntry, GeneratorContext pGeneratorContext) {
-		Object target = null;
+	
+    /**
+     * populate value for configure entry.
+     * 
+     * @param pEntry
+     *            configure entry.
+     * @param pGeneratorContext
+     *            GeneratorContext
+     * @return result value.
+     */
+	protected Object populateValue(Entry<String, String> pEntry, GeneratorContext pGeneratorContext) {
+	    logger.trace("populate value for config entry: {}={}", pEntry.getKey(), pEntry.getValue());
+		Object resultObj = null;
 		String configStr = pEntry.getValue();
-		Matcher matcher = PATTERN_CONSTANT.matcher(configStr);
-		if (matcher.find()) {
-			target = createConstantValue(pEntry, matcher);
-		} else {
-			
+		if (StringUtils.isBlank(configStr)) {
+		    logger.error("config entry: {}={} is not format right.", pEntry.getKey(), pEntry.getValue());
+		    return null;
 		}
-		return target;
+		// judge whether a constant value.
+		Matcher matcher = PATTERN_BRACKET.matcher(configStr);
+		if (!matcher.find()) {
+		    // get value from GeneratorContext.
+		    
+		}
+		
+		
+		ConverterContext converterContext = new ConverterContext();
+		converterContext.put(ConverterConstants.CONFIG_ENTRY, pEntry);
+		converterContext.put(ConverterConstants.CONFIG_ENTRY, resultObj);
+		resultObj = converter.convert(converterContext);
+		return resultObj;
 	}
 	
-	private Object createConstantValue(Entry<String, String> pEntry, Matcher pMatcher) {
-		Object result = null;
-		String configStr = pEntry.getValue();
-//		Matcher matcher = PATTERN_CONSTANT.matcher(configStr);
-		// Get something inside brackets.
-		Matcher mather = PATTERN_BRACKET.matcher(configStr);
-		String literalStr = mather.group(1);
-		mather = PATTERN_BRACE.matcher(configStr);
-		if (mather.find()) {
-			String typeStr = mather.group(1);
-		} else {
-			
-		}
-		return result;
-	}
-	
-//	public static void main(String[] args) {
-//		Map<String, Method> map = new SubConverter().getConvertMethodMaping();
-//		System.out.println(map);
-//	}
-	
-//	static class SubConverter extends Converter {
-//		@Override
-//        protected Object func1(ConverterContext pContext) {
-//			System.out.println("sub");
-//            return null;
-//        }
-//		@ConvertMethod
-//		protected Object func2(ConverterContext pContext) {
-//			return null;
-//		}
-//	}
-	
-	/**
-	 * Converter, sub class should be add custom function for convert value.
-	 * @author hubert
-	 */
+
+    /**
+     * convert chain will process object that get from GeneratorContext.
+     * added common convert method.
+     * Converter, sub class should be add custom function for convert value.
+     * 
+     * @author hubert
+     */
 	protected class Converter {
-        private final Map<String, Method> convertMethodMaping = new HashMap<>();
-        public Converter() {
-            init();
-//            logger.debug("init Converter, convertFuncMaping: {}", convertMethodMaping);
-        }
-        private void init() {
-        	List<Method> methods = new ArrayList<>();
-        	for (Class<?> cls = getClass(); cls != null; cls = cls.getSuperclass()) {
-        		methods.addAll(Arrays.asList(cls.getDeclaredMethods()));
-        	}
-            for (Method method : methods) {
-            	ConvertMethod convertFn = method.getDeclaredAnnotation(ConvertMethod.class);
-                if (convertFn == null) {
-                    continue;
+	    // TODO add cache. for performance and show all already exist convert methods, when development.
+//	    Map<String, Method> cachedMethodMaping = new HashMap<>();
+
+        public Object convert(ConverterContext pContext) {
+            Entry<String, String> configEntry = pContext.get(ConverterConstants.CONFIG_ENTRY);
+            Object resultObj = pContext.get(ConverterConstants.RESULT_OBJECT);
+            logger.trace("convert start, entry: {}={}, result object: {}", configEntry.getKey(), configEntry.getValue(), resultObj);
+            // not need to confirm whether necessary judge resultObj is null.
+            // different convert method should process resultObject by self.
+//            if (resultObj == null) {
+//                return null;
+//            }
+            List<String> functionNames = getFunctionNames(configEntry);
+            logger.trace("get functionNames: {} from config entry: {}={}", functionNames, configEntry.getKey(), configEntry.getValue());
+            if (CollectionUtils.isEmpty(functionNames)) {
+                logger.debug("config entry: {}={} not parse out any available function name.", configEntry.getKey(), configEntry.getValue());
+                return resultObj;
+            }
+
+            List<Method> convertMethods = getConvertMethods(functionNames);
+            if (CollectionUtils.isEmpty(convertMethods)) {
+                logger.error("not found exist convert methods by function names: {}", functionNames);
+                return null;
+            }
+            try {
+                for (Method method : convertMethods) {
+                    method.setAccessible(true);
+                    resultObj = method.invoke(this, pContext);
+                    pContext.put(ConverterConstants.RESULT_OBJECT, resultObj);
                 }
-                if (ArrayUtils.isEmpty(convertFn.value())) {
-                	putMethod(method.getName(), method);
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                String errorMsg = MessageFormat.format("convert config entry: {}={}", configEntry.getKey(), configEntry.getValue());
+                logger.error(errorMsg, e);
+            }
+            return resultObj;
+        }
+
+
+        /**
+         * get list of convert method by function names.
+         * 
+         * @param pFunctionNames
+         *            list of function name.
+         * @return list of convert method.
+         */
+        private List<Method> getConvertMethods(List<String> pFunctionNames) {
+            if (CollectionUtils.isEmpty(pFunctionNames)) {
+                logger.warn("find convert methods, but function names is empty");
+                return null;
+            }
+            // TODO get cached.
+            List<Method> methods = new ArrayList<>(pFunctionNames.size());
+            for (String funcName: pFunctionNames) {
+                Method method = getConvertMethod(funcName);
+                if (method  == null) {
+                    logger.error("");
                 } else {
-                    String[] names = convertFn.value();
-                    for (String name : names) {
-                        if (StringUtils.isBlank(name)) {
-                            // log
-                        } else {
-                        	putMethod(method.getName(), method);
+                    methods.add(method);
+                }
+            }
+            return methods;
+        }
+
+
+        /**
+         * get convert method by function name.
+         * 
+         * @param pFunctionName
+         *            function name.
+         * @return convert method
+         */
+        private Method getConvertMethod(String pFunctionName) {
+        	if (StringUtils.isEmpty(pFunctionName)) {
+        		logger.debug("find convert method, paramter function name is empty");
+        		return null;
+        	}
+        	for (Class<?> cls = getClass(); cls != null; cls = cls.getSuperclass()) {
+        		for (Method method: cls.getDeclaredMethods()) {
+        			ConvertMethod convertMethod = method.getDeclaredAnnotation(ConvertMethod.class);
+                    if (convertMethod == null) {
+                        continue;
+                    }
+                    if (ArrayUtils.isEmpty(convertMethod.value())) {
+                    	if (StringUtils.equals(pFunctionName, method.getName())) {
+                    		return method;
+                    	}
+                    } else {
+                        String[] functionNames = convertMethod.value();
+                        for (String functionName : functionNames) {
+                            if (StringUtils.isBlank(functionName)) {
+                                 logger.error("convert method: {} config name must be not blank.", method);
+                                 continue;
+                            }
+                            if (StringUtils.equals(pFunctionName, functionName)) {
+                            	return method;
+                            }
                         }
                     }
                 }
             }
+        	return null;
         }
-        
-        private void putMethod(String pFuncName, Method pMethod) {
-        	if (convertMethodMaping.containsKey(pFuncName)) {
-//        		logger.warn("init Converter, function name: {} exist, override.", pFuncName);
-        	}
-        	convertMethodMaping.put(pFuncName, pMethod);
-        }
-        private List<Method> getConvertMethods(List<String> pFunctionNames) {
-        	List<Method> methods = null;
-        	methods = new ArrayList<>();
-        	return methods;
-        }
-        
-        
-        public Object convert(ConverterContext pContext) {
-            Entry<String, String> configEntry = pContext.get(ConverterConstants.CONFIG_ENTRY);
-            logger.trace("convert start..., entry: ", configEntry.getKey(), configEntry.getValue());
-            List<String> functionNames = getFunctionNames(configEntry);
-            logger.trace("get functionNames: {} from config entry: {}={}", functionNames, configEntry.getKey(), configEntry.getValue());
-            if (CollectionUtils.isEmpty(functionNames)) {
-            	logger.warn("config entry: {}={} not parse out any available function name.", configEntry.getKey(), configEntry.getValue());
-            	return null;
-            }
-            Object result = null;
-            // TODO get function list.
-            getConvertMethods(functionNames);
-            List<Method> convertMethods = new ArrayList<>();
-            try {
-                for (Method method : convertMethods) {
-                    method.setAccessible(true);
-                    result = method.invoke(this, pContext);
-                    pContext.put(ConverterConstants.PRE_CONVERT_RESULT, result);
-                }
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            	String errorMsg = MessageFormat.format("convert config entry: {}={}", configEntry.getKey(), configEntry.getValue());
-//                logger.error(errorMsg, e);
-            }
-            return result;
-        }
-        
+
+
         /**
-		 * get function names from a configure entry.
-		 * 
-		 * @param pConfigEntry
-		 *            configure entry.
-		 * @return list of function name
-		 */
+         * get function names from a configure entry.
+         * 
+         * @param pConfigEntry
+         *            configure entry.
+         * @return list of function name
+         */
         private List<String> getFunctionNames(Entry<String, String> pConfigEntry) {
-        	logger.trace("get function names from config entry: {}={}", pConfigEntry.getKey(), pConfigEntry.getValue());
+        	logger.trace("get function names start, config entry: {}={}", pConfigEntry.getKey(), pConfigEntry.getValue());
         	if (StringUtils.isBlank(pConfigEntry.getValue())) {
         		logger.debug("configEntry: {}={} not exist any function need act.", pConfigEntry.getKey(), pConfigEntry.getValue());
         		return null;
@@ -238,17 +280,13 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
         	}
         	return functionNames;
         }
-        
-        
+
+
         @ConvertMethod
         protected Object func1(ConverterContext pContext) {
         	System.out.println("parent");
             return null;
         }
-
-        public Map<String, Method> getConvertMethodMaping() {
-			return convertMethodMaping;
-		}
     }
 	
 	/**
@@ -260,8 +298,8 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
         public ConverterConstants(String pName) {
             super(pName);
         }
-        final static ConverterConstants<Entry<String, String>> CONFIG_ENTRY = new ConverterConstants<>("configEntry");
-        final static ConverterConstants<Object> PRE_CONVERT_RESULT = new ConverterConstants<>("preConvertResult");
+        final static ConverterConstants<Entry<String, String>> CONFIG_ENTRY = new ConverterConstants<>("CONFIG_ENTRY");
+        final static ConverterConstants<Object> RESULT_OBJECT = new ConverterConstants<>("RESULT_OBJECT");
     }
 	class ConverterContext {
         private Map<Object, Object> context = new HashMap<>();
