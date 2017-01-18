@@ -11,4 +11,9 @@ import my.util.KeyConstants;
  * @param <T>
  */
 public class DTOConstants<T> extends KeyConstants<T> {
+	public DTOConstants(String pName) {
+		super(pName);
+	}
+	
+	public static final KeyConstants<BaseDTO> BASE_DTO = new KeyConstants<>("baseDTO");
 }
