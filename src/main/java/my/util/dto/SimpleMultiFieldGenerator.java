@@ -62,6 +62,10 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 	 * like: funcName or funcName(arg1,arg2)
 	 */
 	protected static final Pattern PATTERN_FUNCTION = Pattern.compile("^([a-zA-Z]+)(\\([a-zA-Z0-9]+(,[a-zA-Z0-9])*\\))?$");
+	/**
+	 * configure string like: Object.prop1[0].prop2{functions}
+	 */
+	protected static final Pattern PATTERN_CONFIG_STR = Pattern.compile("^([a-zA-Z.0-9\\[\\]]+)(\\{.+\\})?$");
 	
 	protected SimpleMultiFieldGenerator() {
 	    converter = new Converter();
@@ -92,8 +96,12 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 		Iterator<Entry<String, String>> it = propertyMaping.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<String, String> entry = it.next();
-			Object value = populateValue(entry, pGeneratorContext);
-			result.put(entry.getKey(), value);
+			try {
+			    Object value = populateValue(entry, pGeneratorContext);
+			    result.put(entry.getKey(), value);
+			} catch (Exception e) {
+			    logger.error("populate value error!!!!", e);
+            }
 		}
 		logger.debug("generate multi field result: {}", result);
 		return result;
@@ -103,40 +111,73 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
     /**
      * populate value for configure entry.
      * 
-     * @param pEntry
+     * @param pConfigEntry
      *            configure entry.
      * @param pGeneratorContext
      *            GeneratorContext
      * @return result value.
      */
-	protected Object populateValue(Entry<String, String> pEntry, GeneratorContext pGeneratorContext) {
-	    logger.trace("populate value for config entry: {}={}", pEntry.getKey(), pEntry.getValue());
+	protected Object populateValue(Entry<String, String> pConfigEntry, GeneratorContext pGeneratorContext) {
+	    logger.trace("populate value for config entry: {}={}", pConfigEntry.getKey(), pConfigEntry.getValue());
 		Object resultObj = null;
-		String configStr = pEntry.getValue();
+		String configStr = pConfigEntry.getValue();
 		if (StringUtils.isBlank(configStr)) {
-		    logger.error("config entry: {}={} is not format right.", pEntry.getKey(), pEntry.getValue());
+		    logger.error("config entry: {}={} is not format right.", pConfigEntry.getKey(), pConfigEntry.getValue());
 		    return null;
 		}
 		// judge whether a constant value.
 		Matcher matcher = PATTERN_BRACKET.matcher(configStr);
-		if (!matcher.find()) {
-		    // get value from GeneratorContext.
-		    
+		boolean isConstantConfigStr = false;
+		if (matcher.find()) {
+		    resultObj = matcher.group(1);
+		    isConstantConfigStr = true;
+		} else {
+		    resultObj = findValueFromContext(pConfigEntry, pGeneratorContext);
 		}
-		
-		
-		ConverterContext converterContext = new ConverterContext();
-		converterContext.put(ConverterConstants.CONFIG_ENTRY, pEntry);
-		converterContext.put(ConverterConstants.CONFIG_ENTRY, resultObj);
-		resultObj = converter.convert(converterContext);
+		matcher = PATTERN_BRACE.matcher(configStr);
+		// string like : [acd] or Object.prop{func} need convert.
+		if (isConstantConfigStr || matcher.find()) {
+		    ConverterContext converterContext = new ConverterContext();
+		    converterContext.put(ConverterConstants.CONFIG_ENTRY, pConfigEntry);
+		    converterContext.put(ConverterConstants.RESULT_OBJECT, resultObj);
+		    resultObj = converter.convert(converterContext);
+		    logger.debug("config entry: {}={}, converted value: {}", pConfigEntry.getKey(), pConfigEntry.getValue(), resultObj);
+		}
 		return resultObj;
 	}
 	
 
+    private Object findValueFromContext(Entry<String, String> pConfigEntry, GeneratorContext pGeneratorContext) {
+        logger.trace("find value from context for config entry: {}={}", pConfigEntry.getKey(), pConfigEntry.getValue());
+        String configStr = pConfigEntry.getValue();
+        if (StringUtils.isBlank(configStr)) {
+            logger.error("entry: {}={}, config string is empty.", pConfigEntry.getKey(), pConfigEntry.getValue());
+            return null;
+        }
+        Matcher matcher = PATTERN_CONFIG_STR.matcher(configStr);
+        // like: object.prop1[0].prop2
+        String fieldsStr = null;
+        if (matcher.find() && matcher.groupCount() > 0) {
+            fieldsStr = matcher.group(1);
+        } else {
+            logger.error("entry: {}={}, config string may be not format right.", pConfigEntry.getKey(), pConfigEntry.getValue());
+            return null;
+        }
+        Object resultValue = null;
+        String[] fieldArr = fieldsStr.split(".");
+        for (String fieldStr : fieldArr) {
+//            resultValue = getValueByField(fieldStr);
+            
+        }
+        return resultValue;
+    }
+
+
     /**
      * convert chain will process object that get from GeneratorContext.
      * added common convert method.
-     * Converter, sub class should be add custom function for convert value.
+     * Converter, sub class should be add custom function for convert value,
+     * then should re-new sub class for my.util.dto.SimpleMultiFieldGenerator.converter
      * 
      * @author hubert
      */
@@ -147,7 +188,7 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
         public Object convert(ConverterContext pContext) {
             Entry<String, String> configEntry = pContext.get(ConverterConstants.CONFIG_ENTRY);
             Object resultObj = pContext.get(ConverterConstants.RESULT_OBJECT);
-            logger.trace("convert start, entry: {}={}, result object: {}", configEntry.getKey(), configEntry.getValue(), resultObj);
+            logger.debug("convert start, entry: {}={}, result object: {}", configEntry.getKey(), configEntry.getValue(), resultObj);
             // not need to confirm whether necessary judge resultObj is null.
             // different convert method should process resultObject by self.
 //            if (resultObj == null) {
