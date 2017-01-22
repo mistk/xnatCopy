@@ -57,6 +57,10 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 	
+    // add jsp support.
+    //runtime('tomcat:tomcat-embed-jasper')
+    compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+    compile('javax.servlet:jstl')
 	
 	// runtime('mysql:mysql-connector-java')
 	runtime('com.h2database:h2')
