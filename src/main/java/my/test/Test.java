@@ -5,17 +5,18 @@ import java.util.regex.Pattern;
 
 public class Test {
 	public static void main(String[] args) {
-		String configStr = "[true]{String}";
-		configStr = "func(a,b)";
-		Pattern p = Pattern.compile("^\\[(.+)\\](\\{[a-zA-Z]+\\})?$");
-//		p = Pattern.compile("\\[(.+)\\]");
-//		p = Pattern.compile("\\{(.+)\\}");
-		p = Pattern.compile("^([a-zA-Z]+)(\\([a-zA-Z0-9]+(,[a-zA-Z0-9])*\\))?$");
-		Matcher matcher = p.matcher(configStr);
-		if (matcher.find()) {
-			System.out.println(matcher.group());
-			System.out.println(matcher.group(1));
-			System.out.println(matcher.group(2));
-		}
+	    String s = "obj[1]";
+//	    s = "ss";
+	    Pattern p = Pattern.compile("^([a-zA-Z0-9]+)(\\[([0-9])\\])?$");
+	    Matcher m = p.matcher(s);
+	    if (m.find()) {
+	        System.out.println(m.group());
+	        System.out.println(m.group(1));
+	        System.out.println(m.group(2));
+	        System.out.println(m.group(3));
+	    }
+	    String[] arr = {"aa", "bb"};
+	    Object o = arr;
+	    System.out.println(o.getClass().isArray());
 	}
 }

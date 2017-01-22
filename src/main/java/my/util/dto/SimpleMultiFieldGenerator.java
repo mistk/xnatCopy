@@ -5,6 +5,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
@@ -17,10 +18,12 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import my.util.KeyConstants;
 
@@ -66,6 +69,10 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 	 * configure string like: Object.prop1[0].prop2{functions}
 	 */
 	protected static final Pattern PATTERN_CONFIG_STR = Pattern.compile("^([a-zA-Z.0-9\\[\\]]+)(\\{.+\\})?$");
+	/**
+	 * like: obj[1]
+	 */
+	protected static final Pattern PATTERN_FIELD = Pattern.compile("^([a-zA-Z0-9]+)(\\[([0-9])\\])?$");
 	
 	protected SimpleMultiFieldGenerator() {
 	    converter = new Converter();
@@ -95,12 +102,14 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 		Map<String, Object> result = new HashMap<>();
 		Iterator<Entry<String, String>> it = propertyMaping.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<String, String> entry = it.next();
+			Entry<String, String> configEntry = it.next();
 			try {
-			    Object value = populateValue(entry, pGeneratorContext);
-			    result.put(entry.getKey(), value);
+			    Object value = populateValue(configEntry, pGeneratorContext);
+//			    logger.debug("populate value result, entry: {}={}, result value: {}", configEntry.getKey(), configEntry.getValue(), value);
+			    result.put(configEntry.getKey(), value);
 			} catch (Exception e) {
-			    logger.error("populate value error!!!!", e);
+			    String errorMsg = MessageFormat.format("populate value error! entry: {}={}", configEntry.getKey(), configEntry.getValue());
+			    logger.error(errorMsg, e);
             }
 		}
 		logger.debug("generate multi field result: {}", result);
@@ -132,11 +141,12 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 		    resultObj = matcher.group(1);
 		    isConstantConfigStr = true;
 		} else {
-		    resultObj = findValueFromContext(pConfigEntry, pGeneratorContext);
+		    resultObj = retrieveValueFromContext(pConfigEntry, pGeneratorContext);
+		    logger.debug("retrieve result value: {} from GeneratorContext", resultObj);
 		}
 		matcher = PATTERN_BRACE.matcher(configStr);
 		// string like : [acd] or Object.prop{func} need convert.
-		if (isConstantConfigStr || matcher.find()) {
+		if (resultObj != null && (isConstantConfigStr || matcher.find())) {
 		    ConverterContext converterContext = new ConverterContext();
 		    converterContext.put(ConverterConstants.CONFIG_ENTRY, pConfigEntry);
 		    converterContext.put(ConverterConstants.RESULT_OBJECT, resultObj);
@@ -147,7 +157,7 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
 	}
 	
 
-    private Object findValueFromContext(Entry<String, String> pConfigEntry, GeneratorContext pGeneratorContext) {
+    private Object retrieveValueFromContext(Entry<String, String> pConfigEntry, GeneratorContext pGeneratorContext) {
         logger.trace("find value from context for config entry: {}={}", pConfigEntry.getKey(), pConfigEntry.getValue());
         String configStr = pConfigEntry.getValue();
         if (StringUtils.isBlank(configStr)) {
@@ -163,14 +173,41 @@ public class SimpleMultiFieldGenerator extends AbstractDTOGenerator<Map<String, 
             logger.error("entry: {}={}, config string may be not format right.", pConfigEntry.getKey(), pConfigEntry.getValue());
             return null;
         }
-        Object resultValue = null;
         String[] fieldArr = fieldsStr.split(".");
-        for (String fieldStr : fieldArr) {
-//            resultValue = getValueByField(fieldStr);
-            
+        String contextKey = fieldArr[0];
+        matcher = PATTERN_FIELD.matcher(contextKey);
+        int index = -1;
+        if (matcher.find()) {
+            contextKey = matcher.group(1);
+            index = NumberUtils.toInt(matcher.group(3), -1);
         }
-        return resultValue;
+        Object resultObj = pGeneratorContext.get(DTOConstants.getConstant(contextKey));
+        logger.debug("find direct value:{} from GeneratorContext", resultObj);
+        if (index >= 0 && resultObj != null) {
+            if (resultObj instanceof List) {
+                if (((List) resultObj).size() > index) {
+                    resultObj = ((List) resultObj).get(index);
+                }
+            } else if (resultObj.getClass().isArray()) {
+                if (Array.getLength(resultObj) > index) {
+                    resultObj = Array.get(resultObj, index);
+                }
+            }
+        }
+        if (fieldArr.length > 1) {
+            for (int i = 1; resultObj != null && i < fieldArr.length; i++) {
+                String fieldStr = fieldArr[i];
+                try {
+                    resultObj = PropertyUtils.getProperty(resultObj, fieldStr);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    String errorMsg = MessageFormat.format("retrieve property:{} from Object: {}", fieldStr, resultObj);
+                    logger.error(errorMsg, e);
+                }
+            }
+        }
+        return resultObj;
     }
+
 
 
     /**

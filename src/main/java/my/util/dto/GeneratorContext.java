@@ -3,6 +3,10 @@ package my.util.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Generator Context.
+ * @author hubert
+ */
 public class GeneratorContext {
 	/**
      * Object container.

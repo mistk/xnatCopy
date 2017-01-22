@@ -41,7 +41,7 @@ public class IoAcceptorAutoConfigure {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConfigurationProperties(prefix = "ioServer.filterLogConfig")
-	public LoggingFilter loggingFilter(IoServerProperties properties) {
+	public LoggingFilter loggingFilter() {
 		logger.trace("init bean LoggingFilter start...");
 		LoggingFilter loggingFilter = new LoggingFilter();
 		logger.trace("init bean LoggingFilter end...");
@@ -66,7 +66,7 @@ public class IoAcceptorAutoConfigure {
 		IoAcceptor acceptor = new NioSocketAcceptor();
 		// SimpleIoProcessorPool include some session processor, every processor process session.
 		// org.apache.mina.core.polling.AbstractPollingIoProcessor.process(S) invoke filters.
-		acceptor.getFilterChain().addLast(FILTER_NAME_LOGGER, loggingFilter(properties));
+		acceptor.getFilterChain().addLast(FILTER_NAME_LOGGER, loggingFilter());
 //		acceptor.getFilterChain().addLast(FILTER_NAME_CODEC, new ProtocolCodecFilter(new TextLineCodecFactory(Charset.forName("UTF-8"))));
 		acceptor.getFilterChain().addLast(FILTER_NAME_CODEC, new ProtocolCodecFilter(new DeviceCollectDataCodecFactory()));
 		
