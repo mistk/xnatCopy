@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 import my.util.handler.AbstractProcessor;
 import my.util.handler.HandlerChain;
 import my.util.handler.HandlerResult;
+import my.util.handler.Processor;
 
-@Component
+@Component(ResponseProcessor.COMPONENT_NAME)
 public class ResponseProcessor extends AbstractProcessor {
+    public static final String COMPONENT_NAME = Processor.NAMESPACE + ".ResponseProcessor";
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public int process(Map<Object, Object> params, HandlerResult handlerResult) {

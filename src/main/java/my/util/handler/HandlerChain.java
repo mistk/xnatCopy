@@ -43,6 +43,10 @@ public class HandlerChain {
 	public final static int CODE_CONTINUE = 0;
 	public final static int CODE_BREAK = -1;
 	public static final String PARAM_CHAIN_NAME = "chainName";
+	/**
+	 * distinction different chain, all chain prefix.
+	 */
+	public static final String CHAIN_NAMESPACE = "HandlerChain";
 	
 	public HandlerChain() {
 		this(INIT_SIZE);

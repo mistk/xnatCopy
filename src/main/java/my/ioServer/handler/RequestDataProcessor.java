@@ -21,9 +21,11 @@ import my.service.DeviceDataCollectService;
 import my.util.handler.AbstractProcessor;
 import my.util.handler.HandlerChain;
 import my.util.handler.HandlerResult;
+import my.util.handler.Processor;
 
-@Component
+@Component(RequestDataProcessor.COMPONENT_NAME)
 public class RequestDataProcessor extends AbstractProcessor {
+    public static final String COMPONENT_NAME = Processor.NAMESPACE+".RequestDataProcessor";
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	@Autowired
 	private DeviceDataCollectService deviceDataCollectService;

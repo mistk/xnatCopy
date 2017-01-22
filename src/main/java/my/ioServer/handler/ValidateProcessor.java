@@ -9,14 +9,16 @@ import org.springframework.stereotype.Component;
 import my.util.handler.AbstractProcessor;
 import my.util.handler.HandlerChain;
 import my.util.handler.HandlerResult;
+import my.util.handler.Processor;
 
 /**
  * validate action.
  * @author xnat
  *
  */
-@Component
+@Component(ValidateProcessor.COMPONENT_NAME)
 public class ValidateProcessor extends AbstractProcessor {
+    public static final String COMPONENT_NAME = Processor.NAMESPACE+".ValidateProcessor";
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	public int process(Map<Object, Object> params, HandlerResult handlerResult) {

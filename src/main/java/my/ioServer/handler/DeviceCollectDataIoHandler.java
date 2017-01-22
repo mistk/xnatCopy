@@ -3,13 +3,14 @@ package my.ioServer.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.text.StrBuilder;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import my.util.handler.HandlerChain;
 import my.util.handler.HandlerResult;
@@ -24,17 +25,17 @@ import my.util.handler.StatusCode;
 public class DeviceCollectDataIoHandler extends IoHandlerAdapter implements InitializingBean {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private HandlerChain messageReceivedHandlerChain;
-	@Autowired
+	@Resource(name = ValidateProcessor.COMPONENT_NAME)
 	private Processor validateProcessor;
-	@Autowired
+	@Resource(name = RequestDataProcessor.COMPONENT_NAME)
 	private Processor requestDataProcessor;
-	@Autowired
+	@Resource(name = ResponseProcessor.COMPONENT_NAME)
 	private Processor responseProcessor;
 	
 	public void afterPropertiesSet() throws Exception {
 		logger.trace("Initializ bean IoHandler start...");
 		messageReceivedHandlerChain = new HandlerChain(3)
-				.setName(new StrBuilder().append(getClass().getSimpleName()).append(".messageReceivedHandlerChain").toString())
+				.setName(new StrBuilder().append(HandlerChain.CHAIN_NAMESPACE).append(".").append(getClass().getSimpleName()).append(".messageReceivedHandlerChain").toString())
 				.add(validateProcessor, new StatusCode(1, RequestDataProcessor.class.getSimpleName()))
 				.add(requestDataProcessor)
 				.add(responseProcessor);
