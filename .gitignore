@@ -1,5 +1,7 @@
 bin/
 build/
 data/
+/build/
+!/build/libs *.jar
 .gradle/
 .settings/

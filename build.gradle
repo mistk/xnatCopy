@@ -19,7 +19,7 @@ apply plugin: 'org.springframework.boot'
 //project.ext.applicationDefaultJvmArgs = "-Xdebug" "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
 
 springBoot {
-  mainClass = "my.TestApplication"
+  mainClass = "my.Application"
   //jvmArguments "-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8787"
 }
 
@@ -29,7 +29,7 @@ bootRun {
 
 jar {
 	baseName = 'my'
-	version = '0.0.1-SNAPSHOT'
+	version = 'my.jar'
 	manifest {
         attributes 'Implementation-Title': 'Gradle Quickstart',
                    'Implementation-Version': version
@@ -46,13 +46,23 @@ repositories {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-devtools")
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile("org.springframework.boot:spring-boot-devtools")
 
-	compile('org.flywaydb:flyway-core')
+	// compile('org.flywaydb:flyway-core')
+	compile group: 'org.apache.mina', name: 'mina-core', version: '2.0.16'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
+	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 	
+    // add jsp support.
+    //runtime('tomcat:tomcat-embed-jasper')
+    compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+    compile('javax.servlet:jstl')
+	
+	// runtime('mysql:mysql-connector-java')
 	runtime('com.h2database:h2')
 	// runtime('org.apache.derby:derby')
 }

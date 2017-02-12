@@ -1,4 +1,4 @@
-package my;
+package my.constanst;
 
 /**
  * common constants.
@@ -7,4 +7,6 @@ package my;
  */
 public class CommonConstants {
 	public static final String EMPTY = "";
+	public static final String COMMA = ",";
+	public static final String COLON = ":";
 }

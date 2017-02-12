@@ -1,16 +1,57 @@
+# test envrionment configuration file
 spring:
-  jpa.hibernate.ddl-auto: validate
+  jackson:
+    serialization.indent_output: true
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+#  jpa.hibernate.ddl-auto: validate
   h2.console:
     enabled: true
     path: /h2-console
   devtools:
     restart.enabled: false
   datasource:
-#    schema:
-#    data: 
-    url: jdbc:h2:./data/h2/test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: test
-    password: test
-    max-active: 10
+    mysql:
+      url: jdbc:mysql://192.168.56.101:3306/test
+      username: root
+      password: mysql
+    h2:
+      schema:
+      data: 
+      url: jdbc:h2:./data/h2/test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+      username: test
+      password: test
+      max-active: 3
 
-logging.file: D:\tmp\spring-boot.log
+#logging.path和logging.file同时配置，不会有在这个路径有F:\demo\demo.log日志生成，logging.path和logging.file不会进行叠加
+#logging.path和logging.file的value都可以是相对路径或者绝对路径
+logging:
+  path: D:\tmp\log\spring-boot.log
+#  pattern:
+#    console:
+#    file:
+#    level:
+  level:
+    root: info
+    my.autoconfigure.IoAcceptorAutoConfigure: trace
+    my.ioServer.codec.DeviceCollectDataRequestDecoder: trace
+    org.apache.mina.filter.logging.LoggingFilter: trace
+    my.ioServer.handler.DeviceCollectDataIoHandler: trace
+    my.util.handler.HandlerChain: trace
+    my.ioServer.handler.RequestDataProcessor: trace
+    my.ioServer.handler.ResponseProcessor: trace
+    my.ioServer.handler.ValidateProcessor: trace
+
+# io server config
+ioServer:
+  filterLogConfig:
+#   exception handle by IoHandler
+    exceptionCaughtLogLevel: none
+    sessionCreatedLogLevel: debug
+    sessionOpenedLogLevel: trace
+    sessionClosedLogLevel: debug
+    sessionIdleLogLevel: trace
+  defaultPort: 10000
+#  bindAddresses: localhost:11111
