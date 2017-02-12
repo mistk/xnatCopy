@@ -1,5 +1,12 @@
 # test envrionment configuration file
 spring:
+  jackson:
+    defaultPropertyInclusion: NON_NULL
+    serialization:
+      indent_output: true
+      fail_on_empty_beans: false
+    parser:
+      allow_missing_values: true
 #  jpa.hibernate.ddl-auto: validate
   h2.console:
     enabled: true
@@ -30,6 +37,9 @@ logging:
     my.ioServer.handler.RequestDataProcessor: trace
     my.ioServer.handler.ResponseProcessor: trace
     my.ioServer.handler.ValidateProcessor: trace
+    my.controller.TestRestController: trace
+    # controller method invoke detail
+    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace
 
 # io server config
 ioServer:
