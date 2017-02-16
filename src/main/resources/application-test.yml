@@ -28,7 +28,7 @@ spring:
 #logging.path和logging.file同时配置，不会有在这个路径有F:\demo\demo.log日志生成，logging.path和logging.file不会进行叠加
 #logging.path和logging.file的value都可以是相对路径或者绝对路径
 logging:
-  path: D:\tmp\log\spring-boot.log
+  file: D:\tmp\log\spring-boot.log
 #  pattern:
 #    console:
 #    file:

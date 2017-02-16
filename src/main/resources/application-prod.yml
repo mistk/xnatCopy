@@ -17,8 +17,8 @@ spring:
 #    max-active: 10
 
 logging:
-  path: D:\tmp\
-  file: spring-boot.log
+#  path: D:\tmp\
+#  file: spring-boot.log
   level:
     root: warn
     org.apache.mina.filter.logging.LoggingFilter: trace
