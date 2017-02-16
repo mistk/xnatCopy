@@ -1,7 +1,9 @@
 # production envrionment configuration file
 spring:
   jackson:
-    serialization.indent_output: true
+    serialization:
+      indent_output: false
+      fail_on_empty_beans: false
 #  jpa.hibernate.ddl-auto: validate
 #  h2.console:
 #    enabled: true
