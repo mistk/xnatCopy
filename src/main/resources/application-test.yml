@@ -1,4 +1,14 @@
 # test envrionment configuration file
+server.port: 8080
+# EndpointWebMvcManagementContextConfiguration
+management:
+  # EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
+  security.enabled: false
+  # port: 11111
+  port: ${server.port}
+  # actuator url prefix see: EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
+  contextPath: /management
+
 spring:
   jackson:
     serialization.indent_output: true
