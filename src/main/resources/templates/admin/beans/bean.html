@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/beans/fragments :: head (title='bean view page')"></head>
+<body>
+<form th:replace="admin/beans/fragments :: beanSearchForm (${kw})"></form>
+<section class="container-fluid">
+	<div>
+	   bean name: <a th:href="${url}" th:text="${beanName}"></a><br/>
+	   bean class: <span th:text="${beanClassName}"></span>
+	</div>
+</section>
+
+<!-- th:if="not #lists.isEmpty(properties)" -->
+<section class="container-fluid" th:if="${not #lists.isEmpty(properties)}">
+    <h3>property list:</h3>
+    <div class="table table-bordered table-condensed">
+        <div class="row">
+            <div class="col-md-2">property name</div>
+            <div class="col-md-4">property value</div>
+            <div class="col-md-3">property type</div>
+        </div>
+	    <div th:each="propEntry : ${properties}" class="row">
+	        <div class="col-md-2">
+	            <a th:text="${propEntry.key}" th:href="${propEntry.value.url}">property name</a>
+	        </div>
+	        <div th:switch="${propEntry.value.value.beanRef}" class="col-md-4">
+	            <a th:case="true" th:href="${propEntry.value.value.beanUrl}" th:text="${propEntry.value.value.beanName}"></a>
+	            <span th:case="false" th:text="${propEntry.value.value.toString}"></span>
+	        </div>
+	        <div th:text="${propEntry.value.type}" class="col-md-3">property type</div>
+	    </div>
+    </div>
+</section>
+
+<section class="container-fluid" th:if="${not #lists.isEmpty(property)}">
+    <div class="row">
+        <label class="col-md-1">property name: </label>
+        <div class="col-md-1" th:text="${property.name}"></div>
+    </div>
+    <div class="row">
+        <label class="col-md-1">property type : </label>
+        <div class="col-md-1" th:text="${property.type}"></div>
+    </div>
+    <div class="row">
+        <label class="col-md-1">property value : </label>
+        <div class="col-md-1" th:switch="${property.value.beanRef}">
+            <a th:case="true" th:href="${property.value.beanUrl}" th:text="${property.value.beanName}"></a>
+            <span th:case="false" th:text="${property.value.toString}"></span>
+        </div>
+    </div>
+    <form id="beanChangePropertyForm" class="form-horizontal" th:action="${property.changeUrl}" th:if="${property.writable}" method="post">
+        <textarea class="form-control" rows="5" name="newValue"></textarea>
+        <input type="hidden" th:value="${property.name}" name="propertyName"/>
+        <input type="hidden" th:value="${property.beanInfo.beanName}" name="beanName"/>
+        <input type="hidden" th:value="${property.beanInfo.contextId}" name="contextId"/>
+        <input class="btn btn-default" type="submit" value="Submit" />
+    </form>
+</section>
+</body>
+</html>

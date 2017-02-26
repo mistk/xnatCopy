@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/beans/fragments :: head (title='bean search page')"></head>
+<body>
+<form th:replace="admin/beans/fragments :: beanSearchForm (${kw})"></form>
+<section class="container-fluid">
+    <div class="tipMsg">
+        show count limit : <i th:text="${limitCount}">20</i>
+    </div>
+    <div th:each="bean : ${beans}">
+	    <a th:href="${bean.value.url}" th:text="${bean.key}">beanName</a>
+    </div>
+</section>
+</body>
+</html>

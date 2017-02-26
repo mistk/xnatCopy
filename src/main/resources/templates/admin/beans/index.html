@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/beans/fragments :: head (title='beans view page')">
+</head>
+<body>
+<script th:inline="javascript">
+$(function () {
+    var beansInfo = [[${beansInfo}]];
+    dyn.init(beansInfo);
+});
+</script>
+<form th:replace="admin/beans/fragments :: beanSearchForm ('')"></form>
+<section id="header">
+</section>
+<section id="propertyList">
+</section>
+</body>
+</html>

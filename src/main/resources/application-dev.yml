@@ -14,4 +14,4 @@ spring:
 #    password: test
 #    max-active: 10
 
-logging.file: D:\tmp\spring-boot.log
+# logging.file: D:\tmp\spring-boot.log

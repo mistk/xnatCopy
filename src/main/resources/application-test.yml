@@ -1,5 +1,12 @@
 # test envrionment configuration file
-server.port: 8080
+# ========================= server ==========================
+server:
+  port: 8080
+  tomcat:
+    access_log_enabled: true
+    basedir: target/tomcat
+
+# ========================= management =======================
 # EndpointWebMvcManagementContextConfiguration
 management:
   # EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
@@ -9,7 +16,15 @@ management:
   # actuator url prefix see: EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
   contextPath: /management
 
+# ======================== spring ===============================
 spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    content-type: text/html
   jackson:
     defaultPropertyInclusion: NON_NULL
     serialization:
@@ -20,6 +35,7 @@ spring:
   mvc:
     view:
       prefix: /WEB-INF/jsp/
+#      prefix: /templates/
       suffix: .jsp
 #  jpa.hibernate.ddl-auto: validate
   h2.console:
@@ -40,6 +56,7 @@ spring:
       password: test
       max-active: 3
 
+# ========================= logging ==============================
 #logging.path和logging.file同时配置，不会有在这个路径有F:\demo\demo.log日志生成，logging.path和logging.file不会进行叠加
 #logging.path和logging.file的value都可以是相对路径或者绝对路径
 logging:
@@ -59,9 +76,11 @@ logging:
     my.ioServer.handler.ResponseProcessor: trace
     my.ioServer.handler.ValidateProcessor: trace
     my.controller.TestRestController: trace
+    my.actuate.BeansMvcEndpoint: debug
     # controller method invoke detail
-    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace
+    # org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace
 
+# =========================ioServer ==============================
 # io server config
 ioServer:
   filterLogConfig:

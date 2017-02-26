@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.4.2.RELEASE'
+		springBootVersion = '1.5.1.RELEASE'
 	}
 	repositories {
 		mavenLocal()
@@ -49,6 +49,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile("org.springframework.boot:spring-boot-starter-security")
+    compile("org.springframework.boot:spring-boot-actuator-docs")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     // compile("org.springframework.boot:spring-boot-devtools")
 
 	// compile('org.flywaydb:flyway-core')
@@ -58,9 +61,9 @@ dependencies {
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 	
     // add jsp support.
-    //runtime('tomcat:tomcat-embed-jasper')
-    compile("org.apache.tomcat.embed:tomcat-embed-jasper")
-    compile('javax.servlet:jstl')
+    // runtime('tomcat:tomcat-embed-jasper')
+    // compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+    // compile('javax.servlet:jstl')
 	
 	// runtime('mysql:mysql-connector-java')
 	runtime('com.h2database:h2')

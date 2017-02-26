@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head (title)">
+<meta charset="UTF-8" />
+<title th:text="${title}">Fragments title</title>
+
+<!-- <link rel="stylesheet" type="text/css" th:href="@{/css/easyui/themes/default/easyui.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/easyui/themes/icon.css}" />
+<script type="text/javascript" th:src="@{/js/lib/jquery.easyui.min.js}"></script> -->
+
+<link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap/bootstrap.min.css}" />
+<script type="text/javascript" th:src="@{/js/lib/jquery-3.1.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/lib/jquery.form.js}"></script>
+<script type="text/javascript" th:src="@{/js/admin/beans/index.js}"></script>
+</head>
+<body>
+<form th:fragment="beanSearchForm (kw)" action="../beans/search" id="beanSearchForm" method="get">
+    <div>
+        <input class="" type="text" name="beanName" th:value="${kw}" data-options="" />
+        <input type="submit" value="Search"/>
+    </div>
+</form>
+</body>
+</html>
