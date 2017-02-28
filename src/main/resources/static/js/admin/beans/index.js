@@ -22,7 +22,7 @@ $(function () {
 			    // var formElement = jqForm[0]; 
 			    console.log('form params: ', formParams);
 			 
-			    var valid = validate(jqForm);
+			    var valid = this.validate(jqForm);
 			    // here we could return false to prevent the form from being submitted; 
 			    // returning anything other than false will allow the form submit to continue 
 			    return valid; 

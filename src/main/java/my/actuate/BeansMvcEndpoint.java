@@ -109,6 +109,7 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         String propertyName = (String) pParams.get(PARAME_PROPERTY_NAME);
         String beanName = (String) pParams.get(PARAME_BEAN_NAME);
         String newValue = (String) pParams.get(PARAME_NEWVALUE);
+        Map<String, Object> response = new HashMap<>();
         for (Iterator<ConfigurableApplicationContext> it = getContextHierarchy().iterator(); it.hasNext();) {
             ConfigurableApplicationContext context = it.next();
             if (!StringUtils.equals(contextId, context.getId())) {
@@ -136,19 +137,21 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                             originValue = pd.getReadMethod().invoke(beanInstance);
                         }
                         if (ClassUtils.isPrimitiveOrWrapper(pd.getPropertyType())) {
+                            // add spring bean property editor
                             PropertyEditor propertyEditor = PropertyEditorManager.findEditor(pd.getPropertyType());
-                            // pd.getWriteMethod().invoke(beanInstance, newValue);
-                            
+                            propertyEditor.setAsText(newValue);
+                            pd.getWriteMethod().invoke(beanInstance, propertyEditor.getValue());
                         } else {
                             // TODO other type.
                         }
                     }
                 } catch (IntrospectionException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    response.put("succss", false);
+                    response.put("errorMsg", e.getMessage());
                 }
             }
         }
-        Map<String, Object> response = new HashMap<>();
+        response.put("succss", true);
         return response;
     }
 
