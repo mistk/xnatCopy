@@ -1,5 +1,25 @@
 # test envrionment configuration file
+# ========================= server ==========================
+# org.springframework.boot.autoconfigure.web.ServerProperties
 server.port: 8080
+
+# ========================= custome server ==================
+# custome server config
+servers:
+  mina:
+    enabled: true
+    autostart: true
+    filterLogConfig:
+  #   exception handle by IoHandler
+      exceptionCaughtLogLevel: none
+      sessionCreatedLogLevel: debug
+      sessionOpenedLogLevel: trace
+      sessionClosedLogLevel: debug
+      sessionIdleLogLevel: trace
+    defaultPort: 10000
+  #  bindAddresses: localhost:11111
+
+# ========================= management =======================
 # EndpointWebMvcManagementContextConfiguration
 management:
   # EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
@@ -9,7 +29,15 @@ management:
   # actuator url prefix see: EndpointWebMvcManagementContextConfiguration.endpointHandlerMapping()
   contextPath: /management
 
+# ======================== spring ===============================
 spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    content-type: text/html
   jackson:
     defaultPropertyInclusion: NON_NULL
     serialization:
@@ -21,7 +49,7 @@ spring:
     view:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
-#  jpa.hibernate.ddl-auto: validate
+# jpa.hibernate.ddl-auto: validate
   h2.console:
     enabled: true
     path: /h2-console
@@ -40,6 +68,7 @@ spring:
       password: test
       max-active: 3
 
+# ========================= logging ==============================
 #logging.path和logging.file同时配置，不会有在这个路径有F:\demo\demo.log日志生成，logging.path和logging.file不会进行叠加
 #logging.path和logging.file的value都可以是相对路径或者绝对路径
 logging:
@@ -50,26 +79,14 @@ logging:
 #    level:
   level:
     root: info
-    my.autoconfigure.IoAcceptorAutoConfigure: trace
-    my.ioServer.codec.DeviceCollectDataRequestDecoder: trace
+    my.server.mina.autoconfigure.MinaAcceptorAutoConfigure: trace
+    my.server.mina.codec.DeviceCollectDataRequestDecoder: trace
+    my.server.mina.handler.RequestDataProcessor: trace
+    my.server.mina.handler.ResponseProcessor: trace
+    my.server.mina.handler.ValidateProcessor: trace
+    my.server.mina.handler.DeviceCollectDataIoHandler: trace
     org.apache.mina.filter.logging.LoggingFilter: trace
-    my.ioServer.handler.DeviceCollectDataIoHandler: trace
     my.util.handler.HandlerChain: trace
-    my.ioServer.handler.RequestDataProcessor: trace
-    my.ioServer.handler.ResponseProcessor: trace
-    my.ioServer.handler.ValidateProcessor: trace
     my.controller.TestRestController: trace
     # controller method invoke detail
-    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace
-
-# io server config
-ioServer:
-  filterLogConfig:
-#   exception handle by IoHandler
-    exceptionCaughtLogLevel: none
-    sessionCreatedLogLevel: debug
-    sessionOpenedLogLevel: trace
-    sessionClosedLogLevel: debug
-    sessionIdleLogLevel: trace
-  defaultPort: 10000
-#  bindAddresses: localhost:11111
+#    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace

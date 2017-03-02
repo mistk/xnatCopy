@@ -1,4 +1,4 @@
-package my.ioServer.handler;
+package my.server.mina.handler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import my.dao.mysql.entity.DeviceCollectDataEntity;
-import my.ioServer.request.DeviceCollectDataRequest;
+import my.server.mina.request.DeviceCollectDataRequest;
 /**
  * persist message data to database.
  * @author xnat
