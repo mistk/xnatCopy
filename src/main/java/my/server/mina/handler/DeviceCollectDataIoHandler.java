@@ -1,10 +1,11 @@
-package my.ioServer.handler;
+package my.server.mina.handler;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -35,11 +36,14 @@ public class DeviceCollectDataIoHandler extends IoHandlerAdapter implements Init
 	public void afterPropertiesSet() throws Exception {
 		logger.trace("Initializ bean IoHandler start...");
 		messageReceivedHandlerChain = new HandlerChain(3)
-				.setName(new StrBuilder().append(HandlerChain.CHAIN_NAMESPACE).append(".").append(getClass().getSimpleName()).append(".messageReceivedHandlerChain").toString())
+				.setName(new StrBuilder()
+				    .append(HandlerChain.CHAIN_NAMESPACE).append(".")
+				    .append(StringUtils.uncapitalize(getClass().getSimpleName())).append(".messageReceivedHandlerChain")
+				    .toString())
 				.add(validateProcessor, new StatusCode(1, RequestDataProcessor.class.getSimpleName()))
 				.add(requestDataProcessor)
 				.add(responseProcessor);
-		logger.info("init a HandlerChain: {}", messageReceivedHandlerChain.getName());
+		logger.info("Initializ a HandlerChain: {}", messageReceivedHandlerChain.getName());
 		logger.trace("Initializ bean IoHandler end...");
 	}
 	

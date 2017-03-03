@@ -1,10 +1,23 @@
 # test envrionment configuration file
 # ========================= server ==========================
-server:
-  port: 8080
-  tomcat:
-    access_log_enabled: true
-    basedir: target/tomcat
+# org.springframework.boot.autoconfigure.web.ServerProperties
+server.port: 8080
+
+# ========================= custome server ==================
+# custome server config
+servers:
+  mina:
+    enabled: true
+    autostart: true
+    filterLogConfig:
+  #   exception handle by IoHandler
+      exceptionCaughtLogLevel: none
+      sessionCreatedLogLevel: debug
+      sessionOpenedLogLevel: trace
+      sessionClosedLogLevel: debug
+      sessionIdleLogLevel: trace
+    defaultPort: 10000
+  #  bindAddresses: localhost:11111
 
 # ========================= management =======================
 # EndpointWebMvcManagementContextConfiguration
@@ -35,9 +48,8 @@ spring:
   mvc:
     view:
       prefix: /WEB-INF/jsp/
-#      prefix: /templates/
       suffix: .jsp
-#  jpa.hibernate.ddl-auto: validate
+# jpa.hibernate.ddl-auto: validate
   h2.console:
     enabled: true
     path: /h2-console
@@ -67,28 +79,14 @@ logging:
 #    level:
   level:
     root: info
-    my.autoconfigure.IoAcceptorAutoConfigure: trace
-    my.ioServer.codec.DeviceCollectDataRequestDecoder: trace
+    my.server.mina.autoconfigure.MinaAcceptorAutoConfigure: trace
+    my.server.mina.codec.DeviceCollectDataRequestDecoder: trace
+    my.server.mina.handler.RequestDataProcessor: trace
+    my.server.mina.handler.ResponseProcessor: trace
+    my.server.mina.handler.ValidateProcessor: trace
+    my.server.mina.handler.DeviceCollectDataIoHandler: trace
     org.apache.mina.filter.logging.LoggingFilter: trace
-    my.ioServer.handler.DeviceCollectDataIoHandler: trace
     my.util.handler.HandlerChain: trace
-    my.ioServer.handler.RequestDataProcessor: trace
-    my.ioServer.handler.ResponseProcessor: trace
-    my.ioServer.handler.ValidateProcessor: trace
     my.controller.TestRestController: trace
-    my.actuate.BeansMvcEndpoint: debug
     # controller method invoke detail
-    # org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace
-
-# =========================ioServer ==============================
-# io server config
-ioServer:
-  filterLogConfig:
-#   exception handle by IoHandler
-    exceptionCaughtLogLevel: none
-    sessionCreatedLogLevel: debug
-    sessionOpenedLogLevel: trace
-    sessionClosedLogLevel: debug
-    sessionIdleLogLevel: trace
-  defaultPort: 10000
-#  bindAddresses: localhost:11111
+#    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace

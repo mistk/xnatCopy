@@ -1,4 +1,4 @@
-package my.ioServer.handler;
+package my.server.mina.handler;
 
 import java.util.Map;
 

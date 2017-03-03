@@ -46,7 +46,7 @@ public class HandlerChain {
 	/**
 	 * distinction different chain, all chain prefix.
 	 */
-	public static final String CHAIN_NAMESPACE = "HandlerChain";
+	public static final String CHAIN_NAMESPACE = "handlerChain";
 	
 	public HandlerChain() {
 		this(INIT_SIZE);

@@ -1,4 +1,4 @@
-package my.ioServer.codec;
+package my.server.mina.codec;
 
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;

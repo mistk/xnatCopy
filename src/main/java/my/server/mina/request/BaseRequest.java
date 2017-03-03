@@ -1,4 +1,4 @@
-package my.ioServer.request;
+package my.server.mina.request;
 
 import java.io.Serializable;
 
