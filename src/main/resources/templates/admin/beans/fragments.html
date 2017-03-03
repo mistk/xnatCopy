@@ -14,11 +14,13 @@
 <script type="text/javascript" th:src="@{/js/admin/beans/index.js}"></script>
 </head>
 <body>
-<form th:fragment="beanSearchForm (kw)" action="../beans/search" id="beanSearchForm" method="get">
-    <div>
-        <input class="" type="text" name="beanName" th:value="${kw}" data-options="" />
-        <input type="submit" value="Search"/>
-    </div>
-</form>
+<section class="container-fluid" th:fragment="beanSearchSection (kw)">
+	<form th:fragment="beanSearchForm (kw)" action="../beans/search" id="beanSearchForm" method="get" class="form-inline">
+	    <div class="form-group">
+	        <input class="form-control" type="text" name="beanName" th:value="${kw}" placeholder="search bean name" />
+	    </div>
+	    <input class="btn btn-default" type="submit" value="Search"/>
+	</form>
+</section>
 </body>
 </html>

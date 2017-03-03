@@ -5,7 +5,7 @@ import org.springframework.boot.actuate.endpoint.mvc.ManagementServletContext;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
-import my.actuate.BeansMvcEndpoint;
+import my.actuate.beans.BeansMvcEndpoint;
 
 @ManagementContextConfiguration
 @ConditionalOnWebApplication

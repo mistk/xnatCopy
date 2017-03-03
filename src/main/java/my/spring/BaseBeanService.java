@@ -26,6 +26,9 @@ public class BaseBeanService extends BaseBean {
     private final String  LOGGER_NAME  = getClass().getName();
     private final Logger  logger       = LoggerFactory.getLogger(LOGGER_NAME);
     private final Object  runningLock  = new Object();
+    /**
+     * match string like "{0.name}".
+     */
     private final Pattern paramPattern = Pattern.compile("\\{(([0-9]+).([\\w]+))\\}");
     private boolean       running;
     @Autowired
@@ -174,13 +177,17 @@ public class BaseBeanService extends BaseBean {
             return pFormat;
         }
         Matcher matcher = paramPattern.matcher(pFormat);
+        // search string like "{0.name}" in pFormat
         if (!matcher.find()) {
             return MessageFormat.format(pFormat, pArgs);
         }
         StrBuilder sb = new StrBuilder(pFormat);
         matcher = paramPattern.matcher(sb);
         List<Object> args = new ArrayList<>(pArgs.length + 2);
-        // exist many same index e.g: ("abcd {0.name} {1.prop} and {0.age}", person, obj)
+        // "{0.name}" regex resolve:
+        // group(1) => {0.name}
+        // group(2) => 0
+        // group(3) => name
         int count = 0;
         while (matcher.find()) {
             Object indexMappedObject = null;
@@ -195,7 +202,7 @@ public class BaseBeanService extends BaseBean {
                 // ignore. set it's mapped value is null.
             }
             args.add(indexMappedObject);
-            // change 0.name to 0.
+            // change "{0.name}" to "{0}".
             sb = sb.replaceFirst(matcher.group(1), String.valueOf(count));
             matcher = paramPattern.matcher(sb);
             count++;
@@ -219,7 +226,11 @@ public class BaseBeanService extends BaseBean {
      *            the loggingInfo to set
      */
     public void setLoggingInfo(boolean pLoggingInfo) {
-        loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.INFO);
+        if (pLoggingInfo) {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.INFO);
+        } else {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.DEBUG);
+        }
     }
 
 
@@ -238,7 +249,11 @@ public class BaseBeanService extends BaseBean {
      *            the loggingWarning to set
      */
     public void setLoggingWarning(boolean pLoggingWarning) {
-        loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.WARN);
+        if (pLoggingWarning) {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.WARN);
+        } else {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.ERROR);
+        }
     }
 
 
@@ -257,7 +272,11 @@ public class BaseBeanService extends BaseBean {
      *            the loggingError to set
      */
     public void setLoggingError(boolean pLoggingError) {
-        loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.ERROR);
+        if (pLoggingError) {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.ERROR);
+        } else {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.OFF);
+        }
     }
 
 
@@ -276,7 +295,11 @@ public class BaseBeanService extends BaseBean {
      *            the loggingDebug to set
      */
     public void setLoggingDebug(boolean pLoggingDebug) {
-        loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.DEBUG);
+        if (pLoggingDebug) {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.DEBUG);
+        } else {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.INFO);
+        }
     }
 
 
@@ -295,7 +318,11 @@ public class BaseBeanService extends BaseBean {
      *            the loggingTrace to set
      */
     public void setLoggingTrace(boolean pLoggingTrace) {
-        loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.TRACE);
+        if (pLoggingTrace) {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.TRACE);
+        } else {
+            loggingSystem.setLogLevel(LOGGER_NAME, LogLevel.OFF);
+        }
     }
 
 

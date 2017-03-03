@@ -50,7 +50,7 @@ public class Test {
             args.add(indexMappedObject);
             // change 0.name to 0.
             sb = sb.replaceFirst(matcher.group(1), String.valueOf(count));
-            matcher = paramPattern.matcher(sb);
+//            matcher = paramPattern.matcher(sb);
             count++;
         }
         return MessageFormat.format(sb.toString(), args);

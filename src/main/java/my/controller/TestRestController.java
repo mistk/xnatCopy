@@ -1,7 +1,6 @@
 package my.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +17,7 @@ import my.controller.response.TestResponse;
 @RequestMapping("rest")
 public class TestRestController extends BaseController {
 
-    @PostMapping("json")
+    @RequestMapping("json")
     TestResponse json(@RequestBody(required = false) TestRequest pRequest) {
         logInfo("request: {0}", pRequest);
         TestResponse resp = new TestResponse();

@@ -2,13 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="admin/beans/fragments :: head (title='bean search page')"></head>
 <body>
-<form th:replace="admin/beans/fragments :: beanSearchForm (${kw})"></form>
+<section th:replace="admin/beans/fragments :: beanSearchSection (${kw})" />
 <section class="container-fluid">
-    <div class="tipMsg">
-        show count limit : <i th:text="${limitCount}">20</i>
-    </div>
-    <div th:each="bean : ${beans}">
-	    <a th:href="${bean.value.url}" th:text="${bean.key}">beanName</a>
+    <div class="panel panel-default">
+	    <div class="panel-heading">
+		    <h3>Search Beans List</h3>
+		    <p>show count limit : <i th:text="${limitCount}">20</i></p>
+	    </div>
+	    <ul class="list-group">
+	        <li th:each="bean : ${beans}" class="list-group-item">
+	            <a th:href="${bean.value.url}" th:text="${bean.key}">beanName</a>
+	        </li>
+	    </ul>
     </div>
 </section>
 </body>

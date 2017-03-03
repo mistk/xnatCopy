@@ -10,9 +10,11 @@ $(function () {
 });
 </script>
 <form th:replace="admin/beans/fragments :: beanSearchForm ('')"></form>
-<section id="header">
-</section>
-<section id="propertyList">
+<section class="container-fluid">
+    <select>
+        <option value="">Select Type</option>
+        <option value="org.springframework.boot.SpringApplication">SpringApplication</option>
+    </select>
 </section>
 </body>
 </html>

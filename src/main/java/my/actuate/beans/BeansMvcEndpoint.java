@@ -1,4 +1,4 @@
-package my.actuate;
+package my.actuate.beans;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -15,11 +15,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,9 +42,9 @@ import org.springframework.http.MediaType;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
@@ -59,13 +58,15 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
     private final ManagementServletContext managementServletContext;
     private Integer getBeanLimitCount = 20;
     private String beanIdentifierSeparator = "||";
-    private static final String PARAME_CONTEXTID= "contextId";
+    static final String PARAME_CONTEXTID= "contextId";
     private static final String PARAME_PROPERTY_NAME = "propertyName";
     private static final String PARAME_BEAN_NAME = "beanName";
     private static final String PARAME_NEWVALUE = "newValue";
     private static final String URL_BEAN_CHANGE = "bean/change";
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private BeansService beansService;
 
 
     public BeansMvcEndpoint(ManagementServletContext pManagementServletContext) {
@@ -73,10 +74,10 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         managementServletContext = pManagementServletContext;
     }
 
-    @RequestMapping(path = { "beans/search" }, produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(path = { "beans/search" }, produces = MediaType.TEXT_HTML_VALUE)
     public String search(@RequestParam("beanName") String pBeanName, ModelMap pModel) {
         logger.debug("search bean name: {}", pBeanName);
-        Map<String, Object> beans = searchBeans(pBeanName);
+        Map<String, Object> beans = beansService.searchBeans(pBeanName);
         pModel.addAttribute("beans", beans);
         pModel.addAttribute("limitCount", getGetBeanLimitCount());
         pModel.addAttribute("kw", pBeanName);
@@ -84,12 +85,14 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
     }
 
 
-//    @RequestMapping(path = { "beans", "beans/" }, produces = MediaType.TEXT_HTML_VALUE)
-//    public String browse() {
-//        return "admin/beans/index";
-//    }
+    @GetMapping(path = { "beans", "beans/" }, produces = MediaType.TEXT_HTML_VALUE)
+    public String browse(ModelMap pModel) {
+//        List<Class<?>> types = beansService.searchSubtype(pClassName);
+//        pModel.put("", value)
+        return "admin/beans/index";
+    }
     
-    @RequestMapping(path = { "bean/{beanName:.*}" }, produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(path = { "bean/{beanName:.*}" }, produces = MediaType.TEXT_HTML_VALUE)
     public ModelAndView browse(@PathVariable("beanName") String pBeanName, @RequestParam Map<String, Object> pParams) {
         logger.info("browse beanName: {}, params: {}", pBeanName, pParams);
         String contextId = (String) pParams.get(PARAME_CONTEXTID);
@@ -103,7 +106,7 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
     
 
     @ResponseBody
-    @RequestMapping(path={URL_BEAN_CHANGE}, method=RequestMethod.POST)
+    @PostMapping(path={URL_BEAN_CHANGE})
     public Map<String, Object> change(@RequestParam Map<String, Object> pParams) {
         String contextId = (String) pParams.get(PARAME_CONTEXTID);
         String propertyName = (String) pParams.get(PARAME_PROPERTY_NAME);
@@ -136,7 +139,8 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                         if (beanInstance != null) {
                             originValue = pd.getReadMethod().invoke(beanInstance);
                         }
-                        if (ClassUtils.isPrimitiveOrWrapper(pd.getPropertyType())) {
+                        if (ClassUtils.isPrimitiveOrWrapper(pd.getPropertyType())
+                            || String.class.isAssignableFrom(pd.getPropertyType())) {
                             // add spring bean property editor
                             PropertyEditor propertyEditor = PropertyEditorManager.findEditor(pd.getPropertyType());
                             propertyEditor.setAsText(newValue);
@@ -153,42 +157,6 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         }
         response.put("succss", true);
         return response;
-    }
-
-    /***
-     * search matched bean name.
-     * 
-     * @param pBeanName
-     *            search name.
-     * @return matched beans.
-     */
-    private Map<String, Object> searchBeans(String pBeanName) {
-        if (StringUtils.isBlank(pBeanName)) {
-            return Collections.emptyMap();
-        }
-        Pattern pattern = Pattern.compile(new StrBuilder().append(".*").append(pBeanName).append(".*").toString());
-        Map<String, Object> beans = new LinkedHashMap<>();
-        int count = 0, limit = getGetBeanLimitCount();
-        for (Iterator<ConfigurableApplicationContext> it = getContextHierarchy().iterator(); count <= limit && it.hasNext();) {
-            ConfigurableApplicationContext context = it.next();
-            ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-            String[] beanNames = beanFactory.getBeanDefinitionNames();
-            for (int i = 0; i < beanNames.length && count <= limit; i++) {
-                Matcher matcher = pattern.matcher(beanNames[i]);
-                if (matcher.matches()) {
-                    count++;
-                    Map<String, Object> beanInfo = new HashMap<>();
-                    String beanUrl = new StrBuilder()
-                            .append("../bean/")
-                            .append(beanNames[i])
-                            .append("?").append(PARAME_CONTEXTID).append("=").append(context.getId())
-                            .toString();
-                    beanInfo.put("url", beanUrl);
-                    beans.put(beanNames[i], beanInfo);
-                }
-            }
-        }
-        return beans;
     }
 
 
