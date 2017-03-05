@@ -18,7 +18,7 @@ public class DeviceDataCollectService extends BaseBeanService {
 	@Transactional
 	public boolean collect(List<DeviceCollectDataEntity> deviceCollectDatas) {
 		if (CollectionUtils.isEmpty(deviceCollectDatas)) {
-			logWarn("input parameter deviceCollectDatas is empty.");
+			log.warn("input parameter deviceCollectDatas is empty.");
 			return false;
 		}
 //		repository.save(deviceCollectDatas);
@@ -28,7 +28,7 @@ public class DeviceDataCollectService extends BaseBeanService {
 	@Transactional
 	public boolean collect(DeviceCollectDataEntity ...deviceCollectDatas) {
 		if (ArrayUtils.isEmpty(deviceCollectDatas)) {
-		    logWarn("input parameter deviceCollectDatas is empty.");
+		    log.warn("input parameter deviceCollectDatas is empty.");
 			return false;
 		}
 //		repository.save(Arrays.asList(deviceCollectDatas));

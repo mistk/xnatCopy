@@ -1,4 +1,17 @@
 $(function () {
+	$('#typesSelect').change(function(e) {
+		$.get({
+			url: '',
+			dataType: 'html',
+			data: {
+				action: 'getSubtypes', typeName: $(this).val()
+			},
+			success: function(resp) {
+				console.log('resp: ', resp);
+			}
+		})
+//		console.log(e);
+	});
 	$('#beanChangePropertyForm').submit(function() {
         // inside event callbacks 'this' is the DOM element so we first 
         // wrap it in a jQuery object and then invoke ajaxSubmit 

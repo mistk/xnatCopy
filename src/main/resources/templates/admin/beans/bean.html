@@ -9,7 +9,7 @@
 	</div>
 </section>
 
-<section th:replace="admin/beans/fragments :: beanSearchSection (${kw})" />
+<section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '../beans')" />
 
 <!-- th:if="not #lists.isEmpty(properties)" -->
 <section class="container-fluid" th:if="${not #lists.isEmpty(properties)}">
@@ -87,6 +87,7 @@
         <input type="hidden" th:value="${property.name}" name="propertyName"/>
         <input type="hidden" th:value="${property.beanInfo.beanName}" name="beanName"/>
         <input type="hidden" th:value="${property.beanInfo.contextId}" name="contextId"/>
+        <input type="hidden" th:value="change" name="action"/>
     </form>
 </section>
 </body>

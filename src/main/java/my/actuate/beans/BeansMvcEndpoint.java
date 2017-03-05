@@ -9,7 +9,6 @@ import java.beans.PropertyEditorManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,8 +24,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -34,12 +31,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.actuate.endpoint.mvc.AbstractNamedMvcEndpoint;
 import org.springframework.boot.actuate.endpoint.mvc.ManagementServletContext;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,64 +44,89 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import my.util.Log;
 
-@ConfigurationProperties(prefix = "endpoints.admin.beans")
 public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements ApplicationContextAware {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-    private ApplicationContext applicationContext;
-    private final ManagementServletContext managementServletContext;
-    private Integer getBeanLimitCount = 20;
-    private String beanIdentifierSeparator = "||";
-    static final String PARAME_CONTEXTID= "contextId";
-    private static final String PARAME_PROPERTY_NAME = "propertyName";
-    private static final String PARAME_BEAN_NAME = "beanName";
-    private static final String PARAME_NEWVALUE = "newValue";
-    private static final String URL_BEAN_CHANGE = "bean/change";
+    static final String              PARAME_ACTION           = "action";
+    static final String              PARAME_CONTEXTID        = "contextId";
+    static final String              PARAME_PROPERTY_NAME    = "propertyName";
+    static final String              PARAME_BEAN_NAME        = "beanName";
+    static final String              PARAME_NEWVALUE         = "newValue";
+    static final String              PARAME_TYPE_NAME        = "typeName";
+    private static final String      URL_BEAN_CHANGE         = "bean/change";
+    private final Log                log                     = Log.of(getClass());
+    private String                   beanIdentifierSeparator = "||";
+    private ApplicationContext       applicationContext;
     @Autowired
-    private ObjectMapper objectMapper;
+    private ManagementServletContext managementServletContext;
     @Autowired
-    private BeansService beansService;
+    private BeansService             beansService;
 
 
-    public BeansMvcEndpoint(ManagementServletContext pManagementServletContext) {
-        super("admin_beans", "/admin", false);
-        managementServletContext = pManagementServletContext;
-    }
 
-    @GetMapping(path = { "beans/search" }, produces = MediaType.TEXT_HTML_VALUE)
-    public String search(@RequestParam("beanName") String pBeanName, ModelMap pModel) {
-        logger.debug("search bean name: {}", pBeanName);
-        Map<String, Object> beans = beansService.searchBeans(pBeanName);
-        pModel.addAttribute("beans", beans);
-        pModel.addAttribute("limitCount", getGetBeanLimitCount());
-        pModel.addAttribute("kw", pBeanName);
-        return "admin/beans/search";
+    public BeansMvcEndpoint() {
+        super("admin/beans", "/admin/beans", false);
     }
 
 
-    @GetMapping(path = { "beans", "beans/" }, produces = MediaType.TEXT_HTML_VALUE)
-    public String browse(ModelMap pModel) {
-//        List<Class<?>> types = beansService.searchSubtype(pClassName);
-//        pModel.put("", value)
-        return "admin/beans/index";
-    }
-    
-    @GetMapping(path = { "bean/{beanName:.*}" }, produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView browse(@PathVariable("beanName") String pBeanName, @RequestParam Map<String, Object> pParams) {
-        logger.info("browse beanName: {}, params: {}", pBeanName, pParams);
-        String contextId = (String) pParams.get(PARAME_CONTEXTID);
-        String propertyName = (String) pParams.get(PARAME_PROPERTY_NAME);
-        Map<String, Object> beanInfo = buildBeanInfo(pBeanName, contextId, propertyName);
-        ModelAndView  modelAndView = new ModelAndView();
-        modelAndView.getModelMap().addAllAttributes(beanInfo);
-        modelAndView.setViewName("admin/beans/bean");
+
+    @GetMapping(path = {"", "/"}, produces = MediaType.TEXT_HTML_VALUE)
+    public ModelAndView browse(@RequestParam Map<String, Object> pParams) {
+        String action = (String) pParams.get(PARAME_ACTION);
+        log.trace("action: {0}", action);
+        ModelAndView modelAndView = new ModelAndView();
+        String viewName = "index";
+        if ("searchBeans".equals(action)) {
+            String beanName = (String) pParams.get(PARAME_BEAN_NAME);
+            log.debug("searchBeans beanName: {0}", beanName);
+            Map<String, Object> beans = beansService.searchBeans(beanName);
+            modelAndView.addObject("beans", beans)
+                .addObject("limitCount", beansService.getSearchBeanLimitCount())
+                .addObject("kw", beanName);
+            viewName = "search";
+        } else if ("getSubtypes".equals(action)) {
+            String typeName = (String) pParams.get(PARAME_TYPE_NAME);
+            log.debug("getSubtypes typeName: {0}", typeName);
+            List<Map<String, Object>> subTypes = beansService.searchSubtype(typeName);
+            modelAndView.addObject("subtypes", subTypes);
+            viewName = "fragments :: subtypes";
+        } else {
+            List<Class<?>> typeList = beansService.getTypeList();
+            List<Map<String, Object>> subTypes = beansService.searchSubtype(typeList.get(0).getName());
+            modelAndView.addObject("types", typeList)
+                .addObject("subtypes", subTypes);
+            viewName = "index";
+        }
+        modelAndView.setViewName(builViewName(viewName));
         return modelAndView;
     }
-    
+
+
+
+    @GetMapping(path = {"/{beanName:.*}"}, produces = MediaType.TEXT_HTML_VALUE)
+    public ModelAndView browse(@PathVariable("beanName") String pBeanName, @RequestParam Map<String, Object> pParams) {
+        String action = (String) pParams.get(PARAME_ACTION);
+        log.debug("beanName: {0}, action: {1}", pBeanName, action);
+        ModelAndView modelAndView = new ModelAndView();
+        String viewName = "index";
+        if ("change".equals(action))  {
+            
+        } else {
+            String contextId = (String) pParams.get(PARAME_CONTEXTID);
+            String propertyName = (String) pParams.get(PARAME_PROPERTY_NAME);
+            log.debug("contextId: {0}, propertyName: {1}", contextId, propertyName);
+            Map<String, Object> beanInfo = buildBeanInfo(pBeanName, contextId, propertyName);
+            modelAndView.addAllObjects(beanInfo);
+            viewName = "bean";
+        }
+        modelAndView.setViewName(builViewName(viewName));
+        return modelAndView;
+    }
+
+
 
     @ResponseBody
-    @PostMapping(path={URL_BEAN_CHANGE})
+    @PostMapping(path = {URL_BEAN_CHANGE})
     public Map<String, Object> change(@RequestParam Map<String, Object> pParams) {
         String contextId = (String) pParams.get(PARAME_CONTEXTID);
         String propertyName = (String) pParams.get(PARAME_PROPERTY_NAME);
@@ -139,8 +159,7 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                         if (beanInstance != null) {
                             originValue = pd.getReadMethod().invoke(beanInstance);
                         }
-                        if (ClassUtils.isPrimitiveOrWrapper(pd.getPropertyType())
-                            || String.class.isAssignableFrom(pd.getPropertyType())) {
+                        if (ClassUtils.isPrimitiveOrWrapper(pd.getPropertyType()) || String.class.isAssignableFrom(pd.getPropertyType())) {
                             // add spring bean property editor
                             PropertyEditor propertyEditor = PropertyEditorManager.findEditor(pd.getPropertyType());
                             propertyEditor.setAsText(newValue);
@@ -160,9 +179,22 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
     }
 
 
+
+    private String builViewName(String viewSuffix) {
+//        String contextPath = managementServletContext.getContextPath();
+        StrBuilder sb = new StrBuilder();
+//        if (!contextPath.endsWith("/")) {
+//            sb.append("/");
+//        }
+        sb.append("admin/beans/").append(viewSuffix);
+        return sb.toString();
+
+    }
+
+
+
     /**
      * build beans info.
-     * 
      * @param pBeanName
      *            bean name.
      * @return beans info.
@@ -189,23 +221,25 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                 }
                 Object beanInstance = beanFactory.getBean(beanName);
                 if (null == beanInstance) {
-                    logger.debug("get bean: {} is null from beanFactory.", beanName);
+                    log.debug("get bean: {0} is null from beanFactory.", beanName);
                 }
                 Class<?> beanClass = beanFactory.getType(beanName);
                 // may be bean instance not exist.
-//                beanClass = beanInstance.getClass();
-//                try {
-//                    beanClass = ClassUtils.forName(bd.getBeanClassName(), beanFactory.getBeanClassLoader());
-//                } catch (ClassNotFoundException | LinkageError e) {
-//                    String errorMsg = MessageFormat.format("forClassName: {} error", bd.getBeanClassName());
-//                    logger.error(errorMsg, e);
-//                    continue;
-//                }
+                // beanClass = beanInstance.getClass();
+                // try {
+                // beanClass = ClassUtils.forName(bd.getBeanClassName(),
+                // beanFactory.getBeanClassLoader());
+                // } catch (ClassNotFoundException | LinkageError e) {
+                // String errorMsg = MessageFormat.format("forClassName: {}
+                // error", bd.getBeanClassName());
+                // logger.error(errorMsg, e);
+                // continue;
+                // }
                 beanInfo.put("beanName", beanName);
                 beanInfo.put("contextId", pContextId);
                 StrBuilder beanUrl = new StrBuilder().append(beanName).append("?").append(PARAME_CONTEXTID).append("=").append(context.getId());
                 beanInfo.put("url", beanUrl);
-                
+
                 // bean common info.
                 beanInfo.put("beanClassName", beanClass.getName());
                 if (StringUtils.isBlank(pSpecifiedProperty)) {
@@ -229,16 +263,21 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         return beanInfo;
     }
 
+
+
     private String buildBeanIdentifier(ApplicationContext pApplicationContext, String pBeanName) {
         return new StrBuilder().append(pApplicationContext.getId())
-                .append(getBeanIdentifierSeparator())
-                .append(pBeanName)
-                .toString();
+            .append(getBeanIdentifierSeparator())
+            .append(pBeanName)
+            .toString();
     }
+
+
 
     protected boolean isBeanEligible(String beanName, BeanDefinition bd, ConfigurableBeanFactory bf) {
         return (bd.getRole() != BeanDefinition.ROLE_INFRASTRUCTURE && (!bd.isLazyInit() || bf.containsSingleton(beanName)));
     }
+
 
 
     private Set<ConfigurableApplicationContext> getContextHierarchy() {
@@ -250,6 +289,7 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         }
         return contexts;
     }
+
 
 
     private Map<String, Object> buildMethodsInfo(Class<?> pBeanClass) {
@@ -270,6 +310,8 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         return methodsInfo;
     }
 
+
+
     private Map<String, Object> buildPropertyInfo(String pSpecifiedProperty, Class<?> pBeanClass, Object pBeanObj, Map<String, Object> pBeanInfo) {
         Map<String, Object> propInfo = new HashMap<>();
         try {
@@ -285,28 +327,29 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                 }
                 propInfo.put("name", propName);
                 propInfo.put("type", pd.getPropertyType().getName());
-//                String propUrl = new StrBuilder()
-//                        .append(pBeanInfo.get("")).append("&")
-//                        .append(PARAMETER_PROPERTY_NAME).append("=").append(propName)
-//                        .toString();
-//                propInfo.put("url", propUrl);
+                // String propUrl = new StrBuilder()
+                // .append(pBeanInfo.get("")).append("&")
+                // .append(PARAMETER_PROPERTY_NAME).append("=").append(propName)
+                // .toString();
+                // propInfo.put("url", propUrl);
                 propInfo.put("writable", (pd.getWriteMethod() != null));
-                propInfo.put("changeUrl", new StrBuilder().append("../").append(URL_BEAN_CHANGE).toString());
+//                propInfo.put("changeUrl", new StrBuilder().append("../").append(URL_BEAN_CHANGE).toString());
                 propInfo.put("beanInfo", pBeanInfo);
                 if (pBeanObj == null) {
-                    logger.warn("get value for property: {} from bean, but bean object is null", pd.getName());
+                    log.warn("get value for property: {0} from bean, but bean object is null", pd.getName());
                 } else {
                     Map<String, Object> value = populatePropertyValue(pd, pBeanObj);
                     propInfo.put("value", value);
                 }
             }
         } catch (IntrospectionException e) {
-            String errorMsg = MessageFormat.format("buildPropertyInfo for class: {}", pBeanClass.getName());
-            logger.error(errorMsg, e);
+            log.error(e, "buildPropertyInfo for class: {0.name}", pBeanClass);
         }
         return propInfo;
     }
-    
+
+
+
     private Map<String, Object> buildPropertiesInfo(Class<?> pBeanClass, Object pBeanObj, Map<String, Object> pBeanInfo) {
         if (pBeanClass == null) {
             return null;
@@ -324,23 +367,24 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                 propertiesInfo.put(propName, propertyInfo);
                 propertyInfo.put("type", pd.getPropertyType().getName());
                 String propUrl = new StrBuilder()
-                        .append(pBeanInfo.get("url")).append("&")
-                        .append(PARAME_PROPERTY_NAME).append("=").append(propName)
-                        .toString();
+                    .append(pBeanInfo.get("url")).append("&")
+                    .append(PARAME_PROPERTY_NAME).append("=").append(propName)
+                    .toString();
                 propertyInfo.put("url", propUrl);
                 if (pBeanObj == null) {
-                    logger.warn("get value for property: {} from bean, but bean object is null", pd.getName());
+                    log.warn("get value for property: {0.name} from bean, but bean object is null", pd);
                 } else {
                     Map<String, Object> value = populatePropertyValue(pd, pBeanObj);
                     propertyInfo.put("value", value);
                 }
             }
         } catch (IntrospectionException | IllegalArgumentException e) {
-            String errorMsg = MessageFormat.format("buildPropertiesInfo for class: {}", pBeanClass.getName());
-            logger.error(errorMsg, e);
+            log.error(e, "buildPropertiesInfo for class: {0.name}", pBeanClass);
         }
         return propertiesInfo;
     }
+
+
 
     private Map<String, Object> populatePropertyValue(PropertyDescriptor pPropertyDescriptor, Object pBeanObj) {
         Map<String, Object> valueAttr = new HashMap<>();
@@ -353,14 +397,13 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                 valueAttr.put(toStringPropName, originValue.toString());
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            logger.error("PropertyDescriptor get value error!", e);
+            log.error(e, "PropertyDescriptor get value error!");
             return valueAttr;
         }
         boolean found = false;
-        if (!ClassUtils.isPrimitiveOrWrapper(pPropertyDescriptor.getPropertyType())
-                && !String.class.isAssignableFrom(pPropertyDescriptor.getPropertyType())
-                && Class.class.isAssignableFrom(pPropertyDescriptor.getPropertyType())) {
-//            searchBeans(pPropertyDescriptor.getName());
+        if (!ClassUtils.isPrimitiveOrWrapper(pPropertyDescriptor.getPropertyType()) && !String.class
+            .isAssignableFrom(pPropertyDescriptor.getPropertyType()) && Class.class.isAssignableFrom(pPropertyDescriptor.getPropertyType())) {
+            // searchBeans(pPropertyDescriptor.getName());
             for (Iterator<ConfigurableApplicationContext> it = getContextHierarchy().iterator(); !found && it.hasNext();) {
                 ConfigurableApplicationContext context = it.next();
                 ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
@@ -371,7 +414,8 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
                 for (String beanName : existBeanNames) {
                     if (originValue == beanFactory.getBean(beanName)) {
                         valueAttr.put("beanName", beanName);
-                        StrBuilder beanUrl = new StrBuilder().append(beanName).append("?").append(PARAME_CONTEXTID).append("=").append(context.getId());
+                        StrBuilder beanUrl = new StrBuilder().append(beanName).append("?").append(PARAME_CONTEXTID).append("=")
+                            .append(context.getId());
                         valueAttr.put("beanUrl", beanUrl);
                         valueAttr.put(toStringPropName, originValue.toString());
                         found = true;
@@ -384,32 +428,31 @@ public class BeansMvcEndpoint extends AbstractNamedMvcEndpoint implements Applic
         return valueAttr;
     }
 
+
+
     private ConfigurableApplicationContext asConfigurableContext(ApplicationContext applicationContext) {
         Assert.isTrue(applicationContext instanceof ConfigurableApplicationContext,
-                "'" + applicationContext + "' does not implement ConfigurableApplicationContext");
+            "'" + applicationContext + "' does not implement ConfigurableApplicationContext");
         return (ConfigurableApplicationContext) applicationContext;
     }
+
+
 
     @Override
     public void setApplicationContext(ApplicationContext pApplicationContext) throws BeansException {
         applicationContext = pApplicationContext;
     }
 
+
+
     public String getBeanIdentifierSeparator() {
         return beanIdentifierSeparator;
     }
 
+
+
     public void setBeanIdentifierSeparator(String pBeanIdentifierSeparator) {
         beanIdentifierSeparator = pBeanIdentifierSeparator;
     }
-    
-    public Integer getGetBeanLimitCount() {
-        return getBeanLimitCount;
-    }
 
-
-    public void setGetBeanLimitCount(Integer pGetBeanLimitCount) {
-        getBeanLimitCount = pGetBeanLimitCount;
-    }
-    
 }

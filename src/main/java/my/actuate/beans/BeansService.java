@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +17,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrBuilder;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -58,6 +56,11 @@ class BeansService extends BaseBeanService {
     private void initBeansInfoCache(ContextStartedEvent pContextStartedEvent) {
     }
 
+    /**
+     * 
+     * @param pClassName
+     * @return
+     */
     public List<Map<String, Object>> searchSubtype(String pClassName) {
         if (StringUtils.isBlank(pClassName)) {
             return Collections.emptyList();
@@ -66,7 +69,7 @@ class BeansService extends BaseBeanService {
         try {
             type = ClassUtils.forName(pClassName, getApplicationContext().getClassLoader());
         } catch (ClassNotFoundException | LinkageError e) {
-            logError(e, "search subtypes for class: {0}", pClassName);
+            log.error(e, "search subtypes for class: {0}", pClassName);
             return Collections.emptyList();
         }
         return searchSubtype(type);
@@ -182,7 +185,7 @@ class BeansService extends BaseBeanService {
                     count++;
                     Map<String, Object> beanInfo = new HashMap<>();
                     String beanUrl = new StrBuilder()
-                        .append("../bean/")
+                        .append("beans/")
                         .append(beanNames[i])
                         .append("?").append(BeansMvcEndpoint.PARAME_CONTEXTID).append("=").append(context.getId())
                         .toString();
@@ -233,8 +236,8 @@ class BeansService extends BaseBeanService {
             return typeList;
         }
         typeList = new ArrayList<Class<?>>();
-        typeList.add(SpringApplication.class);
-        typeList.add(ApplicationContext.class);
+//        typeList.add(SpringApplication.class);
+//        typeList.add(ApplicationContext.class);
         typeList.add(ApplicationContextInitializer.class);
         typeList.add(ApplicationListener.class);
         if (CollectionUtils.isNotEmpty(getAdditionalTypeList())) {

@@ -19,13 +19,13 @@ public class TestRestController extends BaseController {
 
     @RequestMapping("json")
     TestResponse json(@RequestBody(required = false) TestRequest pRequest) {
-        logInfo("request: {0}", pRequest);
+        log.info("request: {0}", pRequest);
         TestResponse resp = new TestResponse();
         resp.setSuccess(true);
         resp.setState(null);
         resp.setStr2("str2");
         resp.setStr_1("str_1");
-        logDebug("response: {0.class}, abcdac {0.str1}", resp);
+        log.debug("response: {0.class}, abcdac {0.str1}", resp);
         return resp;
     }
 

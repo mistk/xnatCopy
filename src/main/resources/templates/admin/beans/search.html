@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="admin/beans/fragments :: head (title='bean search page')"></head>
 <body>
-<section th:replace="admin/beans/fragments :: beanSearchSection (${kw})" />
+<section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '')" />
 <section class="container-fluid">
     <div class="panel panel-default">
 	    <div class="panel-heading">

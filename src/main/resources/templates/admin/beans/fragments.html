@@ -14,13 +14,19 @@
 <script type="text/javascript" th:src="@{/js/admin/beans/index.js}"></script>
 </head>
 <body>
-<section class="container-fluid" th:fragment="beanSearchSection (kw)">
-	<form th:fragment="beanSearchForm (kw)" action="../beans/search" id="beanSearchForm" method="get" class="form-inline">
+<section class="container-fluid" th:fragment="beanSearchSection (kw, actionUrl)">
+	<form th:fragment="beanSearchForm (kw)" th:action="${actionUrl}" id="beanSearchForm" method="get" class="form-inline">
 	    <div class="form-group">
-	        <input class="form-control" type="text" name="beanName" th:value="${kw}" placeholder="search bean name" />
+	        <input class="form-control" type="text" name="beanName" th:value="${kw}" placeholder="Search bean name" />
 	    </div>
 	    <input class="btn btn-default" type="submit" value="Search"/>
+	    <input type="hidden" value="searchBeans" name="action" />
 	</form>
 </section>
+<ul th:fragment="subtypes" th:if="${not #lists.isEmpty(subtypes)}" class="list-group">
+    <li th:each="bean : ${subtypes}" class="list-group-item">
+        <a th:href="${bean.url}" th:text="${bean.beanName}">beanName</a>
+    </li>
+</ul>
 </body>
 </html>

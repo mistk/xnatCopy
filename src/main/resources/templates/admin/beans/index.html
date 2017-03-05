@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="admin/beans/fragments :: head (title='beans view page')">
-</head>
-<body>
+<head th:replace="admin/beans/fragments :: head (title='beans view page')"></head>
+<body th:inline="text">
 <script th:inline="javascript">
 $(function () {
-    var beansInfo = [[${beansInfo}]];
-    dyn.init(beansInfo);
+    //var beansInfo = [[${beansInfo}]];
+    //dyn.init(beansInfo);
 });
 </script>
 <form th:replace="admin/beans/fragments :: beanSearchForm ('')"></form>
 <section class="container-fluid">
-    <select>
-        <option value="">Select Type</option>
-        <option value="org.springframework.boot.SpringApplication">SpringApplication</option>
-    </select>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Show Common Beans
+    </div>
+    <div class="panel-body">
+	    <select id="typesSelect">
+	        <option th:each="type : ${types}" th:value="${type.name}" th:text="${type.simpleName}"></option>
+	    </select>
+    </div>
+    
+	<ul th:replace="admin/beans/fragments :: subtypes"></ul>
+</div>
 </section>
 </body>
 </html>
