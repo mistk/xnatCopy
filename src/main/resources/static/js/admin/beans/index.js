@@ -1,16 +1,47 @@
 $(function () {
+	// 方法调用 表单ajax提交
+	$('#beanMethodInvokeForm').ajaxForm({
+		dataType: 'json',
+		beforeSubmit: function(formData, jqForm, options) {
+			jqForm.find('.successMsg').html('');
+			jqForm.find('.errorMsg').html('');
+		    return true;
+		},
+		success: function(responseText, statusText, xhr, $form) {
+			if (responseText.success) {
+				$form.find('.successMsg').html('success');
+			} else {
+				$form.find('.errorMsg').html(responseText.errorMsg);
+			}
+		}
+	});
+	// 按下alt+k 后聚焦到 搜索 bean 的输入框.
+	$(document).keyup(function(e) {
+		// 'k' = 75
+		const KEY_COED_K = 75;
+		if (e.altKey && e.keyCode == KEY_COED_K) {
+			var $kwInput = $('#beanSearchForm input[name=beanName]');
+			let v = $kwInput.val();
+			$kwInput.val('').focus().val(v).select();
+		}
+	});
+	// 当焦点在 搜索bean的输入框时 按下 ESC 失去焦点.
+	$('#beanSearchForm input[name=beanName]').keyup(function(e) {
+		const KEY_CODE_ESC = 27;
+		if (e.keyCode == KEY_CODE_ESC) {
+			$(this).blur();
+		}
+	});
 	$('#typesSelect').change(function(e) {
 		$.get({
 			url: '',
-			dataType: 'html',
 			data: {
 				action: 'getSubtypes', typeName: $(this).val()
 			},
 			success: function(resp) {
-				console.log('resp: ', resp);
+				$('#subtypsArea').html(resp);
 			}
 		})
-//		console.log(e);
 	});
 	$('#beanChangePropertyForm').submit(function() {
         // inside event callbacks 'this' is the DOM element so we first 
@@ -25,6 +56,7 @@ $(function () {
 	        //clearForm: true        // clear all form fields after successful submit 
 	        //resetForm: true        // reset the form after successful submit
 			// pre-submit callback
+			dataType: 'json',
 			beforeSubmit: function(formData, jqForm, options) {
 			    // formData is an array; here we use $.param to convert it to a string to display it 
 			    // but the form plugin does this for you automatically when it submits the data 
@@ -33,7 +65,7 @@ $(function () {
 			    // jqForm is a jQuery object encapsulating the form element.  To access the 
 			    // DOM element for the form do this: 
 			    // var formElement = jqForm[0]; 
-			    console.log('form params: ', formParams);
+			    // console.log('form params: ', formParams);
 			 
 			    var valid = this.validate(jqForm);
 			    // here we could return false to prevent the form from being submitted; 
@@ -46,6 +78,7 @@ $(function () {
 			    // To validate, we can access the DOM elements directly and return true 
 			 
 			    var form = jqForm[0];
+			    // console.log('=====', form.newValue.value);
 			    if (!form.newValue.value) return false;
 			    return true;
 			},
@@ -61,9 +94,11 @@ $(function () {
 			    // if the ajaxForm method was passed an Options Object with the dataType 
 			    // property set to 'json' then the first argument to the success callback 
 			    // is the json data object returned by the server 
-			 
-				console.log('status: ' + statusText + '\n\nresponseText: \n' + responseText + 
-			        '\n\nThe output div should have already been updated with the responseText.');
+				if (responseText.success) {
+					window.location.reload();
+				} else {
+					$form.find('.errorMsg').html(responseText.errorMsg);
+				}
 			}
 		});
         // !!! Important !!! 
@@ -72,25 +107,3 @@ $(function () {
 	});
 //	$('#beanChangePropertyForm').ajaxForm({});
 });
-var dyn = {
-	init: function(beansInfo) {
-//		$('#beanSearchForm').form('submit', {
-//			onSubmit: function(opt) {
-//				console.log(opt);
-//				return true;
-//			}
-//		});
-//		var beansInfoObj = dyn.toJsonObj(beansInfo);
-//		console.log('parsed json object: ', beansInfoObj);
-//		for (var beanName in beansInfoObj) {
-//			var beanObj = beansInfoObj[beanName];
-//			$('#header').html(beanName);
-//			console.log('beanObj: ', beanObj);
-//			var propertyList = beanObj['propertyList'];
-//		}
-	},
-	toJsonObj: function(jsonStr) {
-		return JSON.parse(jsonStr);
-	},
-	
-}

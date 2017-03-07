@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/beans/fragments :: head (title='property view page')"></head>
+<body th:inline="text" class="container">
+<section class="row">
+	<div class="well">
+	   bean name: <a th:href="${beanUrl}" th:text="${beanName}"></a><br/>
+	   bean class: <span th:text="${beanClassName}"></span>
+	</div>
+</section>
+
+<div class="row">
+    <section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '../beans')" />
+</div>
+
+<section class="row">
+    <table class="table table-bordered table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Name</td>
+                <td th:text="${name}"></td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td th:text="${type}"></td>
+            </tr>
+            <tr>
+                <td>Value</td>
+                <td th:text="${value.toString}"></td>
+            </tr>
+        </tbody>
+        <!-- <tfoot></tfoot> -->
+    </table>
+
+    <form id="beanChangePropertyForm" class="form" th:action="${changeUrl}" th:if="${writable}" method="post">
+        <div th:switch="${type}" class="form-group">
+            <div th:case="boolean" class="radio">
+			  <label th:switch="${value.toString}">
+			    <input th:case="'true'" class="radio-inline" type="radio" name="newValue" value="true" checked="checked" >true</input>
+			    <input th:case="'false'" class="radio-inline" type="radio" name="newValue" value="true" >true</input>
+			  </label>
+			  <label th:switch="${value.toString}">
+			    <input th:case="'true'" class="radio-inline" type="radio" name="newValue" value="false" >false</input>
+			    <input th:case="'false'" class="radio-inline" type="radio" name="newValue" value="false" checked="checked" >false</input>
+			  </label>
+			</div>
+	        <textarea th:case="*" class="form-control" rows="5" name="newValue"></textarea>
+        </div>
+        <div class="form-group">
+            <input class="btn btn-default" type="submit" value="Change" />
+        </div>
+        <p class="errorMsg bg-warning"></p>
+        
+        <input type="hidden" th:value="${name}" name="propertyName"/>
+        <input type="hidden" th:value="${beanName}" name="beanName"/>
+        <input type="hidden" th:value="${contextId}" name="contextId"/>
+    </form>
+</section>
+
+</body>
+</html>

@@ -31,6 +31,7 @@ management:
 
 # ======================== spring ===============================
 spring:
+  application.name: testAppliaction
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -79,14 +80,14 @@ logging:
 #    level:
   level:
     root: info
-    my.server.mina.autoconfigure.MinaAcceptorAutoConfigure: trace
-    my.server.mina.codec.DeviceCollectDataRequestDecoder: trace
-    my.server.mina.handler.RequestDataProcessor: trace
-    my.server.mina.handler.ResponseProcessor: trace
-    my.server.mina.handler.ValidateProcessor: trace
-    my.server.mina.handler.DeviceCollectDataIoHandler: trace
-    org.apache.mina.filter.logging.LoggingFilter: trace
-    my.util.handler.HandlerChain: trace
-    my.controller.TestRestController: trace
+#    my.server.mina.autoconfigure.MinaAcceptorAutoConfigure: trace
+#    my.server.mina.codec.DeviceCollectDataRequestDecoder: trace
+#    my.server.mina.handler.RequestDataProcessor: trace
+#    my.server.mina.handler.ResponseProcessor: trace
+#    my.server.mina.handler.ValidateProcessor: trace
+#    my.server.mina.handler.DeviceCollectDataIoHandler: trace
+#    org.apache.mina.filter.logging.LoggingFilter: trace
+#    my.util.handler.HandlerChain: trace
+#    my.controller.TestRestController: trace
     # controller method invoke detail
 #    org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod: trace

@@ -2,17 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="admin/beans/fragments :: head (title='bean view page')"></head>
 <body th:inline="text">
-<section class="container-fluid">
-	<div>
+<section  class="container">
+	<div class="well">
 	   bean name: <a th:href="${url}" th:text="${beanName}"></a><br/>
 	   bean class: <span th:text="${beanClassName}"></span>
 	</div>
 </section>
 
-<section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '../beans')" />
+<div class="container">
+    <section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '../beans')" />
+</div>
 
-<!-- th:if="not #lists.isEmpty(properties)" -->
-<section class="container-fluid" th:if="${not #lists.isEmpty(properties)}">
+<!-- properties area -->
+<div class="container-fluid" th:if="${not #lists.isEmpty(properties)}">
     <div class="panel panel-default">
         <div class="panel-heading">
 		    <h3>Property View</h3>
@@ -20,9 +22,9 @@
 	    <table class="table table-bordered table-condensed table-striped table-hover">
 	        <thead>
 	            <tr>
-		            <th>name</th>
-		            <th>value</th>
-		            <th>type</th>
+		            <th>Name</th>
+		            <th>Value</th>
+		            <th>Type</th>
 	            </tr>
 	        </thead>
 	        <tbody>
@@ -39,56 +41,33 @@
 	        </tfoot>
 	    </table>
     </div>
-</section>
+</div>
 
-<section class="container-fluid" th:if="${not #lists.isEmpty(property)}">
-    <table class="table table-bordered table-condensed table-hover">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Property Name</td>
-                <td th:text="${property.name}"></td>
-            </tr>
-            <tr>
-                <td>Property Type</td>
-                <td th:text="${property.type}"></td>
-            </tr>
-            <tr>
-                <td>Property Value</td>
-                <td th:text="${property.value.toString}"></td>
-            </tr>
-        </tbody>
-        <tfoot>
-        </tfoot>
-    </table>
-
-    <form id="beanChangePropertyForm" class="form" th:action="${property.changeUrl}" th:if="${property.writable}" method="post">
-        <div th:switch="${property.type}" class="form-group">
-            <div th:case="boolean" class="radio">
-			  <label th:switch="${property.value.toString}">
-			    <input th:case="'true'" class="radio-inline" type="radio" name="newValue" value="true" checked="checked" >true</input>
-			    <input th:case="'false'" class="radio-inline" type="radio" name="newValue" value="true" >true</input>
-			  </label>
-			  <label th:switch="${property.value.toString}">
-			    <input th:case="'true'" class="radio-inline" type="radio" name="newValue" value="false" >false</input>
-			    <input th:case="'false'" class="radio-inline" type="radio" name="newValue" value="false" checked="checked" >false</input>
-			  </label>
-			</div>
-	        <textarea th:case="*" class="form-control" rows="5" name="newValue"></textarea>
+<!-- methods area -->
+<div class="container-fluid" th:if="${not #lists.isEmpty(methods)}">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3>Method View</h3>
         </div>
-        <div class="form-group">
-            <input class="btn btn-default" type="submit" value="Change" />
-        </div>
-        <input type="hidden" th:value="${property.name}" name="propertyName"/>
-        <input type="hidden" th:value="${property.beanInfo.beanName}" name="beanName"/>
-        <input type="hidden" th:value="${property.beanInfo.contextId}" name="contextId"/>
-        <input type="hidden" th:value="change" name="action"/>
-    </form>
-</section>
+        <table class="table table-bordered table-condensed table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Return Type</th>
+                    <th>Declaring Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="methodEntry : ${methods}">
+                    <td><a th:text="${methodEntry.key}" th:href="${methodEntry.value.url}"></a></td>
+                    <td th:text="${methodEntry.value.returnType}"></td>
+                    <td th:text="${methodEntry.value.declaringClass}"></td>
+                </tr>
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+    </div>
+</div>
 </body>
 </html>

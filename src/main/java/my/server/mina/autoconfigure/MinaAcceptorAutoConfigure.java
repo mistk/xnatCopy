@@ -30,6 +30,9 @@ import org.springframework.context.annotation.Configuration;
 import my.constanst.CommonConstants;
 import my.server.mina.codec.DeviceCollectDataCodecFactory;
 import my.server.mina.handler.DeviceCollectDataIoHandler;
+import my.server.mina.handler.RequestDataProcessor;
+import my.server.mina.handler.ResponseProcessor;
+import my.server.mina.handler.ValidateProcessor;
 
 @Configuration
 @EnableConfigurationProperties(MinaServerProperties.class)
@@ -68,7 +71,7 @@ public class MinaAcceptorAutoConfigure {
         return ioHandler;
     }
 
-
+    
 
     @Bean(MINA_IOACCEPTOR)
     @ConditionalOnMissingBean
@@ -104,6 +107,27 @@ public class MinaAcceptorAutoConfigure {
         }
         logger.trace("Initializ bean {} end...", MINA_IOACCEPTOR);
         return acceptor;
+    }
+
+
+
+    @Bean(RequestDataProcessor.COMPONENT_NAME)
+    RequestDataProcessor requestDataProcessor() {
+        return new RequestDataProcessor();
+    }
+
+
+
+    @Bean(ResponseProcessor.COMPONENT_NAME)
+    ResponseProcessor responseProcessor() {
+        return new ResponseProcessor();
+    }
+
+
+
+    @Bean(ValidateProcessor.COMPONENT_NAME)
+    ValidateProcessor validateProcessor() {
+        return new ValidateProcessor();
     }
 
 

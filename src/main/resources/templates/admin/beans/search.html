@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="admin/beans/fragments :: head (title='bean search page')"></head>
-<body>
-<section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '')" />
-<section class="container-fluid">
+<body class="container">
+<div class="row">
+    <section th:replace="admin/beans/fragments :: beanSearchSection (${kw}, '')" />
+</div>
+<div class="row">
     <div class="panel panel-default">
 	    <div class="panel-heading">
 		    <h3>Search Beans List</h3>
@@ -15,6 +17,6 @@
 	        </li>
 	    </ul>
     </div>
-</section>
+</div>
 </body>
 </html>

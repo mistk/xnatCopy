@@ -10,7 +10,7 @@ import java.util.Map;
  *
  */
 public interface Processor {
-    public static final String NAMESPACE = "Processor";
+    public static final String NAMESPACE = "processor";
 	/**
 	 * processor name.
 	 * note must not be blank. for identify.

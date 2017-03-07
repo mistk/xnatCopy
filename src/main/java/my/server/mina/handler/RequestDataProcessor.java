@@ -8,7 +8,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import my.dao.mysql.entity.DeviceCollectDataEntity;
 import my.server.mina.request.DeviceCollectDataRequest;
@@ -23,7 +22,6 @@ import my.util.handler.HandlerChain;
 import my.util.handler.HandlerResult;
 import my.util.handler.Processor;
 
-@Component(RequestDataProcessor.COMPONENT_NAME)
 public class RequestDataProcessor extends AbstractProcessor {
     public static final String COMPONENT_NAME = Processor.NAMESPACE+".RequestDataProcessor";
 	private final Logger logger = LoggerFactory.getLogger(getClass());

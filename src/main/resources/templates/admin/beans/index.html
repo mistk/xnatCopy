@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head th:replace="admin/beans/fragments :: head (title='beans view page')"></head>
 <body th:inline="text">
 <script th:inline="javascript">
@@ -8,20 +8,32 @@ $(function () {
     //dyn.init(beansInfo);
 });
 </script>
-<form th:replace="admin/beans/fragments :: beanSearchForm ('')"></form>
-<section class="container-fluid">
-<div class="panel panel-default">
-    <div class="panel-heading">
-        Show Common Beans
+<div class="container theme-showcase" role="main">
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <h1>Theme example</h1>
+      <p>This is a template showcasing the optional theme stylesheet included in Bootstrap. Use it as a starting point to create something more unique by building on or modifying it.</p>
     </div>
-    <div class="panel-body">
-	    <select id="typesSelect">
-	        <option th:each="type : ${types}" th:value="${type.name}" th:text="${type.simpleName}"></option>
-	    </select>
-    </div>
-    
-	<ul th:replace="admin/beans/fragments :: subtypes"></ul>
+
+	<div class="page-header">
+	   <h1>Search</h1>
+	</div>
+    <section th:replace="admin/beans/fragments :: beanSearchForm ('')" />
+	
+	<div class="panel panel-default">
+	    <div class="panel-heading">
+	        Show Common Beans
+	    </div>
+	    <div class="panel-body">
+            <p class="bg-info">set beansService.additionalTypeList's value can show more type.</p>
+		    <select id="typesSelect">
+		        <option th:each="type : ${types}" th:value="${type.name}" th:text="${type.simpleName}"></option>
+		    </select>
+	    </div>
+	    <div id="subtypsArea">
+	    	<ul th:replace="admin/beans/fragments :: subtypes"></ul>
+	    </div>
+	</div>
 </div>
-</section>
 </body>
 </html>

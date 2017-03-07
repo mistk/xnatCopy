@@ -14,9 +14,9 @@ import org.springframework.context.ApplicationContextAware;
  * @author hubert
  */
 public class BaseBean implements ApplicationContextAware, BeanNameAware, BeanClassLoaderAware, InitializingBean {
-    private ApplicationContext applicationContext;
-    private String             beanName;
-    private ClassLoader        classLoader;
+    private ApplicationContext _applicationContext;
+    private String             _beanName;
+    private ClassLoader        _classLoader;
 
 
 
@@ -39,21 +39,21 @@ public class BaseBean implements ApplicationContextAware, BeanNameAware, BeanCla
 
     @Override
     public void setBeanName(String pBeanName) {
-        this.beanName = pBeanName;
+        this._beanName = pBeanName;
     }
 
 
 
     @Override
     public void setApplicationContext(ApplicationContext pApplicationContext) throws BeansException {
-        this.applicationContext = pApplicationContext;
+        this._applicationContext = pApplicationContext;
     }
 
 
 
     @Override
     public void setBeanClassLoader(ClassLoader pClassLoader) {
-        this.classLoader = pClassLoader;
+        this._classLoader = pClassLoader;
 
     }
 
@@ -64,7 +64,7 @@ public class BaseBean implements ApplicationContextAware, BeanNameAware, BeanCla
      * @return
      */
     public ClassLoader getClassLoader() {
-        return classLoader;
+        return _classLoader;
     }
 
 
@@ -73,7 +73,7 @@ public class BaseBean implements ApplicationContextAware, BeanNameAware, BeanCla
      * @return the applicationContext
      */
     public ApplicationContext getApplicationContext() {
-        return applicationContext;
+        return _applicationContext;
     }
 
 
@@ -82,7 +82,7 @@ public class BaseBean implements ApplicationContextAware, BeanNameAware, BeanCla
      * @return the beanName
      */
     public String getBeanName() {
-        return beanName;
+        return _beanName;
     }
 
 }

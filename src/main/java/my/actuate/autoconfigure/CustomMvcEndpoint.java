@@ -8,14 +8,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import my.actuate.beans.BeansMvcEndpoint;
+import my.actuate.beans.BeansService;
 
 @ManagementContextConfiguration
 @ConditionalOnWebApplication
 @AutoConfigureAfter(EndpointWebMvcHypermediaManagementContextConfiguration.class)
 public class CustomMvcEndpoint {
+    @Bean
+    @ConfigurationProperties(prefix = "endpoints.admin.beans")
+    BeansService beansService() {
+        return new BeansService();
+    }
+
+
 
     @Bean
-//    @ConditionalOnEnabledEndpoint("admin/beans")
+    // @ConditionalOnEnabledEndpoint("admin/beans")
     @ConfigurationProperties(prefix = "endpoints.admin.beans")
     public BeansMvcEndpoint beansMvcEndpoint() {
         BeansMvcEndpoint beansMvcEndpoint = new BeansMvcEndpoint();
